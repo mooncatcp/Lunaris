@@ -14,8 +14,8 @@
     "skipLibCheck": true,
     "strict": true,
     "esModuleInterop": true,
-    "strictNullChecks": false,
-    "noImplicitAny": false,
+    "strictNullChecks": true,
+    "noImplicitAny": true,
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
@@ -31,6 +31,18 @@
       ],
       "@app/config/*": [
         "libs/config/src/*"
+      ],
+      "@app/request": [
+        "libs/request/src"
+      ],
+      "@app/request/*": [
+        "libs/request/src/*"
+      ],
+      "@app/response": [
+        "libs/response/src"
+      ],
+      "@app/response/*": [
+        "libs/response/src/*"
       ]
     }
   }
