@@ -3,9 +3,9 @@
 Lunaris is the reference implementation of the Mooncat protocol.
 
 ## Maintainers
-- @kislball
-- @mirdukkk
-- @amirust
+- [@kislball](https://github.com/kislball)
+- [@mirdukkk](https://github.com/mirdukkk)
+- [@Amirust](https://github.com/Amirust)
 
 
 ## License
