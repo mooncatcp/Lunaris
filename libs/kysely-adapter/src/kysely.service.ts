@@ -1,7 +1,6 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { Kysely, LogEvent, Migrator, QueryLogEvent } from 'kysely'
 import { DialectFactoryService } from './dialect-factory.service'
-import { KyselyModule } from './kysely.module'
 import { StaticMigrationProviderService } from './static-migration-provider.service'
 
 @Injectable()
