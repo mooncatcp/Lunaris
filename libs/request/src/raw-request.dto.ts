@@ -1,16 +1,25 @@
-import { Expose } from 'class-transformer'
 import { IsString } from 'class-validator'
+import crypto from 'crypto'
 
 export class RawRequest {
-  @Expose({ name: 'p' })
   @IsString()
-  declare public: string
+  private declare p: string
 
-  @Expose({ name: 'd' })
   @IsString()
-  declare data: string
+  private declare d: string
 
-  @Expose({ name: 's' })
   @IsString()
-  declare signature: string
+  private declare s: string
+
+  get data(): Buffer {
+    return Buffer.from(this.d, 'base64')
+  }
+
+  get signature(): Buffer {
+    return Buffer.from(this.s, 'base64')
+  }
+
+  get public(): crypto.KeyObject {
+    return crypto.createPublicKey(this.p)
+  }
 }

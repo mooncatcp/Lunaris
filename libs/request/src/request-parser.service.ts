@@ -7,18 +7,23 @@ import { validateOrReject } from 'class-validator'
 
 @Injectable()
 export class RequestParserService {
-  async fromObject<T extends object>(obj: object, c: ClassConstructor<T>): Promise<T> {
-    console.log(obj)
+  async getRawRequest(obj: object): Promise<RawRequest> {
     const rawObject = plainToInstance(RawRequest, obj)
     await validateOrReject(rawObject)
 
-    return this.parse(rawObject, c)
+    return rawObject
+  }
+
+  async fromObject<T extends object>(obj: object, c: ClassConstructor<T>): Promise<T> {
+    const req = await this.getRawRequest(obj)
+
+    return this.parse(req, c)
   }
 
   async parse<T extends object>(req: RawRequest, c: ClassConstructor<T>): Promise<T> {
-    const publicKey = crypto.createPublicKey(req.public)
-    const signature = Buffer.from(req.signature, 'base64')
-    const data = Buffer.from(req.data)
+    const publicKey = req.public
+    const signature = req.signature
+    const data = req.data
     const ok = crypto.verify(
       'sha256',
       data,
