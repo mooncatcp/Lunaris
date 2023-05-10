@@ -3,7 +3,7 @@ import { Kysely } from 'kysely'
 export const init0001 = {
   async up(db: Kysely<any>): Promise<void> {
     await db.schema
-      .createTable('auth')
+      .createTable('keystore')
       .addColumn('login', 'text', col => col.primaryKey())
       .addColumn('privateKey', 'text', col => col.notNull())
       .addColumn('publicKey', 'text', col => col.notNull())
@@ -11,14 +11,14 @@ export const init0001 = {
       .addColumn('passwordHash', 'text', col => col.notNull())
       .execute()
     await db.schema
-      .createIndex('auth_public')
-      .on('auth')
+      .createIndex('keystore_public')
+      .on('keystore')
       .column('publicKey') // for reverse public key lookup
       .execute()
   },
   async down(db: Kysely<any>){
     await db.schema
-      .dropTable('auth')
+      .dropTable('keystore')
       .execute()
   },
 }

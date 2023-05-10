@@ -3,10 +3,10 @@ import { MooncatConfigModule } from '@app/config'
 import { KyselyModule } from '@app/kysely-adapter'
 import { ConfigModule } from '@nestjs/config'
 import { EventEmitterModule } from '@nestjs/event-emitter'
-import { RequestModule } from '@app/request'
 import { ResponseModule } from '@app/response'
-import { AuthModule } from '@app/auth-server'
-import { AuthController } from './controllers/auth.controller'
+import { KeystoreModule } from '@app/keystore-server'
+import { KeystoreController } from './controllers/keystore.controller'
+import { CryptoModule } from '@app/crypto'
 
 @Module({
   imports: [
@@ -17,9 +17,9 @@ import { AuthController } from './controllers/auth.controller'
     MooncatConfigModule,
     KyselyModule,
     ResponseModule,
-    RequestModule,
-    AuthModule,
+    KeystoreModule,
+    CryptoModule,
   ],
-  controllers: [ AuthController ],
+  controllers: [ KeystoreController ],
 })
 export class AppModule {}

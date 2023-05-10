@@ -32,12 +32,6 @@
       "@app/config/*": [
         "libs/config/src/*"
       ],
-      "@app/request": [
-        "libs/request/src"
-      ],
-      "@app/request/*": [
-        "libs/request/src/*"
-      ],
       "@app/response": [
         "libs/response/src"
       ],
@@ -50,11 +44,17 @@
       "@app/schema/*": [
         "libs/schema/src/*"
       ],
-      "@app/auth-server": [
-        "libs/auth-server/src"
+      "@app/keystore-server": [
+        "libs/keystore-server/src"
       ],
-      "@app/auth-server/*": [
-        "libs/auth-server/src/*"
+      "@app/keystore-server/*": [
+        "libs/keystore-server/src/*"
+      ],
+      "@app/crypto": [
+        "libs/crypto/src"
+      ],
+      "@app/crypto/*": [
+        "libs/crypto/src/*"
       ]
     }
   }

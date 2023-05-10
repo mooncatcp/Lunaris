@@ -1,5 +1,5 @@
-import { Auth } from './auth.schema'
+import { Keystore } from './keystore.schema'
 
 export interface DB {
-  auth: Auth
+  keystore: Keystore
 }

@@ -25,15 +25,6 @@
         "tsConfigPath": "libs/config/tsconfig.lib.json"
       }
     },
-    "request": {
-      "type": "library",
-      "root": "libs/request",
-      "entryFile": "index",
-      "sourceRoot": "libs/request/src",
-      "compilerOptions": {
-        "tsConfigPath": "libs/request/tsconfig.lib.json"
-      }
-    },
     "response": {
       "type": "library",
       "root": "libs/response",
@@ -52,13 +43,22 @@
         "tsConfigPath": "libs/schema/tsconfig.lib.json"
       }
     },
-    "auth-server": {
+    "keystore-server": {
       "type": "library",
-      "root": "libs/auth-server",
+      "root": "libs/keystore-server",
       "entryFile": "index",
-      "sourceRoot": "libs/auth-server/src",
+      "sourceRoot": "libs/keystore-server/src",
       "compilerOptions": {
-        "tsConfigPath": "libs/auth-server/tsconfig.lib.json"
+        "tsConfigPath": "libs/keystore-server/tsconfig.lib.json"
+      }
+    },
+    "crypto": {
+      "type": "library",
+      "root": "libs/crypto",
+      "entryFile": "index",
+      "sourceRoot": "libs/crypto/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/crypto/tsconfig.lib.json"
       }
     }
   }
