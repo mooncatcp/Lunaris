@@ -24,16 +24,20 @@ export class RequestParserService {
     const publicKey = req.public
     const signature = req.signature
     const data = req.data
-    const ok = crypto.verify(
-      'sha256',
-      data,
-      publicKey,
-      signature,
-    )
 
-    if (!ok) {
-      throw new RequestException(RequestExceptionType.INVALID_SIGNATURE)
+    if (publicKey !== null && signature !== null) {
+      const ok = crypto.verify(
+        'sha256',
+        data,
+        publicKey,
+        signature,
+      )
+
+      if (!ok) {
+        throw new RequestException(RequestExceptionType.INVALID_SIGNATURE)
+      }
     }
+
     const decodedData = plainToInstance(c, JSON.parse(data.toString()) as object)
 
     await validateOrReject(decodedData)

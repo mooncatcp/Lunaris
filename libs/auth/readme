@@ -1,0 +1,13 @@
+auth specification draft
+
+methods:
+
+1. POST /auth - create a new user with some data
+2. GET /auth/:login - get data of a given user
+
+notes:
+
+public key should be in pem format, as in the rest of mooncat.
+
+auth server shall not make any assumptions about usage of iv, passwordHash, privateKey.
+they should only be used by client.

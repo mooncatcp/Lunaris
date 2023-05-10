@@ -43,6 +43,18 @@
       ],
       "@app/response/*": [
         "libs/response/src/*"
+      ],
+      "@app/schema": [
+        "libs/schema/src"
+      ],
+      "@app/schema/*": [
+        "libs/schema/src/*"
+      ],
+      "@app/auth": [
+        "libs/auth/src"
+      ],
+      "@app/auth/*": [
+        "libs/auth/src/*"
       ]
     }
   }

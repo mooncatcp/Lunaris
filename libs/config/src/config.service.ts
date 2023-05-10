@@ -7,8 +7,10 @@ export class MooncatConfigService {
   private readonly logger = new Logger(MooncatConfigService.name)
   databaseType: DatabaseType
   dsn: string
+  logQueries: boolean
 
   constructor(config: ConfigService) {
+    this.logQueries = config.get<string>('LOG_QUERIES') === 'true'
     this.databaseType = databaseTypeFromString(config.getOrThrow('DB_TYPE'))
 
     if (this.databaseType === DatabaseType.Sqlite) {

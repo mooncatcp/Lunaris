@@ -42,6 +42,24 @@
       "compilerOptions": {
         "tsConfigPath": "libs/response/tsconfig.lib.json"
       }
+    },
+    "schema": {
+      "type": "library",
+      "root": "libs/schema",
+      "entryFile": "index",
+      "sourceRoot": "libs/schema/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/schema/tsconfig.lib.json"
+      }
+    },
+    "auth": {
+      "type": "library",
+      "root": "libs/auth",
+      "entryFile": "index",
+      "sourceRoot": "libs/auth/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/auth/tsconfig.lib.json"
+      }
     }
   }
 }

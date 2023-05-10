@@ -2,6 +2,7 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { Kysely, LogEvent, Migrator, QueryLogEvent } from 'kysely'
 import { DialectFactoryService } from './dialect-factory.service'
 import { StaticMigrationProviderService } from './static-migration-provider.service'
+import { MooncatConfigService } from '@app/config'
 
 @Injectable()
 export class KyselyService<T> extends Kysely<T> implements OnModuleInit {
@@ -9,11 +10,13 @@ export class KyselyService<T> extends Kysely<T> implements OnModuleInit {
 
   constructor(
     private readonly migrationProvider: StaticMigrationProviderService,
+    private readonly config: MooncatConfigService,
     dialectFactory: DialectFactoryService,
   ) {
     super({
       dialect: dialectFactory.getDialect(),
       log: (event: LogEvent) => {
+        if (!this.config.logQueries) return
         if (event.level === 'query') {
           event = event as QueryLogEvent
           this.logger.verbose(`query ${event.query.sql} took ${event.queryDurationMillis}ms to execute`)
@@ -29,8 +32,6 @@ export class KyselyService<T> extends Kysely<T> implements OnModuleInit {
       db: this as KyselyService<any>,
       provider: this.migrationProvider,
     })
-
-    console.log((await migrator.getMigrations())[0].migration)
 
     const { error, results } = await migrator.migrateToLatest()
 

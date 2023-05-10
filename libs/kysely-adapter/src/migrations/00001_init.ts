@@ -4,7 +4,7 @@ export const init0001 = {
   async up(db: Kysely<any>): Promise<void> {
     await db.schema
       .createTable('auth')
-      .addColumn('id', 'text', col => col.primaryKey())
+      .addColumn('login', 'text', col => col.primaryKey())
       .addColumn('privateKey', 'text', col => col.notNull())
       .addColumn('publicKey', 'text', col => col.notNull())
       .addColumn('iv', 'text', col => col.notNull())

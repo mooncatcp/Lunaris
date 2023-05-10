@@ -3,6 +3,7 @@ export enum RequestExceptionType {
   PARSE_NON_BODY = 'PARSE_NON_BODY',
   EXPECTED_TYPE = 'EXPECTED_TYPE',
   EXPECTED_OBJECT = 'EXPECTED_OBJECT',
+  NO_SIGNATURE = 'NO_SIGNATURE',
 }
 
 export class RequestException extends Error {
