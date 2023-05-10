@@ -6,7 +6,7 @@ import { init0001 } from './migrations/00001_init'
 export class StaticMigrationProviderService implements MigrationProvider {
   async getMigrations(): Promise<Record<string, Migration>> {
     return {
-      '00001_init': init0001,
+      init0001,
     }
   }
 }

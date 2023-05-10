@@ -1,7 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { DatabaseType, MooncatConfigService } from '@app/config'
-import { Dialect, SqliteDialect } from 'kysely'
+import { Dialect, PostgresDialect, SqliteDialect } from 'kysely'
 import sqlite from 'better-sqlite3'
+import { Pool, PoolConfig } from 'pg'
+import { parse } from 'pg-connection-string'
+import Cursor from 'pg-cursor'
 
 @Injectable()
 export class DialectFactoryService {
@@ -18,8 +21,16 @@ export class DialectFactoryService {
         },
       })
     } else if (this.config.databaseType === DatabaseType.Postgres) {
-      // TODO: add postgres
-      throw new Error('not implemented')
+      const data = parse(this.config.dsn) as PoolConfig
+      return new PostgresDialect({
+        onCreateConnection: async () => {
+          this.logger.log('connection to the database has been established')
+        },
+        pool: new Pool({
+          ...data,
+        }),
+        cursor: Cursor,
+      })
     } else {
       throw new TypeError(`unknown database type - ${this.config.databaseType}`)
     }
