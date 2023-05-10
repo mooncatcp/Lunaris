@@ -55,6 +55,12 @@
       ],
       "@app/crypto/*": [
         "libs/crypto/src/*"
+      ],
+      "@app/auth": [
+        "libs/auth/src"
+      ],
+      "@app/auth/*": [
+        "libs/auth/src/*"
       ]
     }
   }

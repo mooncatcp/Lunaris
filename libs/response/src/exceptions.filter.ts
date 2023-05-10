@@ -4,7 +4,6 @@ import { ErrorCode } from './error-code.enum'
 import { FastifyReply } from 'fastify'
 import { instanceToPlain } from 'class-transformer'
 import WebSocket from 'ws'
-import { RequestException, RequestExceptionType } from '@app/request'
 import { ValidationError } from 'class-validator'
 
 @Catch()
@@ -35,16 +34,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
       response.errors.push(error)
       responseCode = exception.getStatus()
-    } else if (exception instanceof RequestException) {
-      switch (exception.message) {
-        case RequestExceptionType.INVALID_SIGNATURE:
-        case RequestExceptionType.NO_SIGNATURE:
-          responseCode = 401
-          break
-        default:
-          responseCode = 500
-          break
-      }
     } else if (Array.isArray(exception) && exception.length > 0 && exception[0] instanceof ValidationError) {
       responseCode = 400
       for (const error of (exception as ValidationError[])) {
