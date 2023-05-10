@@ -50,11 +50,11 @@
       "@app/schema/*": [
         "libs/schema/src/*"
       ],
-      "@app/auth": [
-        "libs/auth/src"
+      "@app/auth-server": [
+        "libs/auth-server/src"
       ],
-      "@app/auth/*": [
-        "libs/auth/src/*"
+      "@app/auth-server/*": [
+        "libs/auth-server/src/*"
       ]
     }
   }

@@ -52,13 +52,13 @@
         "tsConfigPath": "libs/schema/tsconfig.lib.json"
       }
     },
-    "auth": {
+    "auth-server": {
       "type": "library",
-      "root": "libs/auth",
+      "root": "libs/auth-server",
       "entryFile": "index",
-      "sourceRoot": "libs/auth/src",
+      "sourceRoot": "libs/auth-server/src",
       "compilerOptions": {
-        "tsConfigPath": "libs/auth/tsconfig.lib.json"
+        "tsConfigPath": "libs/auth-server/tsconfig.lib.json"
       }
     }
   }

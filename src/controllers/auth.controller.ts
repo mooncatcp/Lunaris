@@ -1,5 +1,5 @@
 import { Controller, Get, NotFoundException, Param, Post } from '@nestjs/common'
-import { AuthService } from '@app/auth'
+import { AuthService } from '@app/auth-server'
 import { Auth } from '@app/schema'
 import { ErrorCode } from '@app/response'
 import { MooncatBody, MooncatBodyData } from '@app/request'
