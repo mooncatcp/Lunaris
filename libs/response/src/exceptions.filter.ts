@@ -10,7 +10,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
   private readonly logger = new Logger(AllExceptionsFilter.name)
 
   catch(exception: any, host: ArgumentsHost): any {
-    this.logger.verbose(`caught an exception - ${exception}`, exception?.stack ?? 'no stack')
+    this.logger.verbose(`Caught an exception - ${exception}`, exception?.stack ?? 'no stack')
     const response = new Response()
     response.result = null
     response.ok = false

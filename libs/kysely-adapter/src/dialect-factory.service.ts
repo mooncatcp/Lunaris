@@ -17,14 +17,14 @@ export class DialectFactoryService {
       return new SqliteDialect({
         database: sqlite(this.config.dsn, {}),
         onCreateConnection: async () => {
-          this.logger.log('connection to the database has been established')
+          this.logger.log('Connection to the database has been established')
         },
       })
     } else if (this.config.databaseType === DatabaseType.Postgres) {
       const data = parse(this.config.dsn) as PoolConfig
       return new PostgresDialect({
         onCreateConnection: async () => {
-          this.logger.log('connection to the database has been established')
+          this.logger.log('Connection to the database has been established')
         },
         pool: new Pool({
           ...data,
@@ -32,7 +32,8 @@ export class DialectFactoryService {
         cursor: Cursor,
       })
     } else {
-      throw new TypeError(`unknown database type - ${this.config.databaseType}`)
+      this.logger.error(`Unknown database type - ${this.config.databaseType}`)
+      process.exit(1)
     }
   }
 }

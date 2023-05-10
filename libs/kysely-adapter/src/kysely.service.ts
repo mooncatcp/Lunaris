@@ -19,9 +19,9 @@ export class KyselyService<T> extends Kysely<T> implements OnModuleInit {
         if (!this.config.logQueries) return
         if (event.level === 'query') {
           event = event as QueryLogEvent
-          this.logger.verbose(`query ${event.query.sql} took ${event.queryDurationMillis}ms to execute`)
+          this.logger.verbose(`Query \`${event.query.sql}\` took ${event.queryDurationMillis}ms to execute`)
         } else if (event.level === 'error') {
-          this.logger.error(`query ${event.query.sql} returned an error ${event.error}`)
+          this.logger.error(`Query \`${event.query.sql}\` returned an error ${event.error}`)
         }
       },
     })
@@ -37,14 +37,14 @@ export class KyselyService<T> extends Kysely<T> implements OnModuleInit {
 
     results?.forEach(result => {
       if (result.status === 'Success') {
-        this.logger.log(`migration ${result.migrationName} executed(${result.direction})`)
+        this.logger.log(`Migration ${result.migrationName} executed(${result.direction})`)
       } else if (result.status === 'Error') {
-        this.logger.error(`migration ${result.migrationName} failed to execute(${result.direction})`)
+        this.logger.error(`Migration ${result.migrationName} failed to execute(${result.direction})`)
       }
     })
 
     if (error) {
-      this.logger.error('failed to migrate')
+      this.logger.error('Failed to migrate')
       if (error instanceof Error) {
         this.logger.error(error.stack)
       } else {
