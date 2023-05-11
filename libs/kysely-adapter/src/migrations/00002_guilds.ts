@@ -64,7 +64,7 @@ export const guilds00002: Migration = {
       .addColumn('permissions', 'integer', c => c.notNull().defaultTo(0))
       .addColumn('roleId', 'text', c => c.references('role.id').onDelete('cascade'))
       .addColumn('memberId', 'text', c => c.references('member.id').onDelete('cascade'))
-      .addColumn('channelId', 'text', c => c.references('channel.id').onDelete('cascade'))
+      .addColumn('channelId', 'text', c => c.notNull().references('channel.id').onDelete('cascade'))
       .execute()
   },
 }

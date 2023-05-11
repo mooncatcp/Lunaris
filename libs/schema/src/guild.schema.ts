@@ -41,6 +41,7 @@ export interface Message {
   id: string
   channelId: string
   content: string
+  lastUpdatedAt?: Date
 }
 
 // we can't add Attachment[] on message
