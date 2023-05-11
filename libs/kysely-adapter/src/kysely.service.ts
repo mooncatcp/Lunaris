@@ -16,7 +16,7 @@ export class KyselyService<T> extends Kysely<T> implements OnModuleInit {
     super({
       dialect: dialectFactory.getDialect(),
       log: (event: LogEvent) => {
-        if (!this.config.logQueries) return
+        if (!this.config.debug) return
         if (event.level === 'query') {
           event = event as QueryLogEvent
           this.logger.verbose(`Query \`${event.query.sql}\` took ${event.queryDurationMillis}ms to execute`)

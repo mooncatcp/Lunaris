@@ -7,6 +7,8 @@ import { ResponseModule } from '@app/response'
 import { KeystoreModule } from '@app/keystore-server'
 import { KeystoreController } from './controllers/keystore.controller'
 import { CryptoModule } from '@app/crypto'
+import { MembersModule } from '@app/members'
+import { AuthModule } from '@app/auth'
 
 @Module({
   imports: [
@@ -19,6 +21,8 @@ import { CryptoModule } from '@app/crypto'
     ResponseModule,
     KeystoreModule,
     CryptoModule,
+    MembersModule,
+    AuthModule,
   ],
   controllers: [ KeystoreController ],
 })

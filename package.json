@@ -10,6 +10,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \"libs/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
+    "config": "nest start --entryFile config",
     "start:repl": "nest start --entryFile repl",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
@@ -30,6 +31,7 @@
     "@nestjs/platform-fastify": "^9.4.0",
     "@nestjs/platform-ws": "^9.4.0",
     "@nestjs/websockets": "^9.4.0",
+    "@types/inquirer": "^9.0.3",
     "better-sqlite3": "^8.3.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
@@ -60,6 +62,7 @@
     "eslint": "^8.0.1",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
+    "inquirer": "^8.2.5",
     "jest": "29.5.0",
     "prettier": "^2.3.2",
     "source-map-support": "^0.5.20",
@@ -97,7 +100,8 @@
       "^@app/response(|/.*)$": "<rootDir>/libs/response/src/$1",
       "^@app/schema(|/.*)$": "<rootDir>/libs/schema/src/$1",
       "^@app/auth(|/.*)$": "<rootDir>/libs/auth/src/$1",
-      "^@app/crypto(|/.*)$": "<rootDir>/libs/crypto/src/$1"
+      "^@app/crypto(|/.*)$": "<rootDir>/libs/crypto/src/$1",
+      "^@app/members(|/.*)$": "<rootDir>/libs/members/src/$1"
     }
   }
 }

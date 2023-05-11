@@ -18,6 +18,7 @@ export interface Role {
 export interface Member {
   id: string
   publicKey: string
+  isOwner: boolean
   avatar?: string
   username: string
 }
@@ -41,7 +42,9 @@ export interface Message {
   id: string
   channelId: string
   content: string
+  iv: string
   lastUpdatedAt?: Date
+  flags: number
 }
 
 // we can't add Attachment[] on message
@@ -54,7 +57,8 @@ export interface Attachment {
 export interface PermissionOverwrite {
   id: string
   type: 'role' | 'member'
-  permissions: Generated<number>
+  deny: Generated<number>
+  allow: Generated<number>
   // memberId and roleId are mutually exclusive
   // separate properties because each column can only
   // link to one table(roles and members are stored in different tables).

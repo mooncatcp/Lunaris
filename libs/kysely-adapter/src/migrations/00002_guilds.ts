@@ -61,10 +61,12 @@ export const guilds00002: Migration = {
       .createTable('permissionOverwrite')
       .addColumn('id', 'text', c => c.primaryKey().notNull())
       .addColumn('type', 'text', c => c.notNull())
-      .addColumn('permissions', 'integer', c => c.notNull().defaultTo(0))
+      .addColumn('allow', 'integer', c => c.notNull().defaultTo(0))
+      .addColumn('deny', 'integer', c => c.notNull().defaultTo(0))
       .addColumn('roleId', 'text', c => c.references('role.id').onDelete('cascade'))
       .addColumn('memberId', 'text', c => c.references('member.id').onDelete('cascade'))
       .addColumn('channelId', 'text', c => c.notNull().references('channel.id').onDelete('cascade'))
+      .addCheckConstraint('permissionOverwrite_no_overlap', sql`allow & deny = 0`)
       .execute()
   },
 }
