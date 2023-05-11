@@ -22,6 +22,8 @@ export interface Member {
   username: string
 }
 
+// many-to-many relationships can only be done like this
+// typeorm does basically the same
 export interface RoleMemberRelation {
   memberId: string
   roleId: string
@@ -41,7 +43,7 @@ export interface Message {
   content: string
 }
 
-// we can't add arr: Attachment[] on message
+// we can't add Attachment[] on message
 export interface Attachment {
   id: string
   messageId: string
