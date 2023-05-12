@@ -67,7 +67,13 @@
       ],
       "@app/members/*": [
         "libs/members/src/*"
-      ]
+      ],
+      "@app/channels": [
+        "libs/channels/src"
+      ],
+        "@app/channels/*": [
+            "libs/channels/src/*"
+        ],
     }
   }
 }

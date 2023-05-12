@@ -101,7 +101,8 @@
       "^@app/schema(|/.*)$": "<rootDir>/libs/schema/src/$1",
       "^@app/auth(|/.*)$": "<rootDir>/libs/auth/src/$1",
       "^@app/crypto(|/.*)$": "<rootDir>/libs/crypto/src/$1",
-      "^@app/members(|/.*)$": "<rootDir>/libs/members/src/$1"
+      "^@app/members(|/.*)$": "<rootDir>/libs/members/src/$1",
+      "^@app/channels(|/.*)$": "<rootDir>/libs/channels/src/$1"
     }
   }
 }

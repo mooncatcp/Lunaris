@@ -1,0 +1,5 @@
+APP_PORT=3000
+DB_TYPE=sqlite/postgres
+DB_DSN=sqlite.db/postgresql://...
+DEBUG=false/true
+AES_KEY=random aes key, length 256 bits

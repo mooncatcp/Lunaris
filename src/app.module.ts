@@ -9,6 +9,8 @@ import { KeystoreController } from './controllers/keystore.controller'
 import { CryptoModule } from '@app/crypto'
 import { MembersModule } from '@app/members'
 import { AuthModule } from '@app/auth'
+import { ChannelsController } from './controllers/channels.controller'
+import { ChannelsModule } from '@app/channels'
 
 @Module({
   imports: [
@@ -23,7 +25,8 @@ import { AuthModule } from '@app/auth'
     CryptoModule,
     MembersModule,
     AuthModule,
+    ChannelsModule,
   ],
-  controllers: [ KeystoreController ],
+  controllers: [ KeystoreController, ChannelsController ],
 })
 export class AppModule {}
