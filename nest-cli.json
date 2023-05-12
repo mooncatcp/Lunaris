@@ -78,6 +78,24 @@
       "compilerOptions": {
         "tsConfigPath": "libs/members/tsconfig.lib.json"
       }
+    },
+    "permissions": {
+      "type": "library",
+      "root": "libs/permissions",
+      "entryFile": "index",
+      "sourceRoot": "libs/permissions/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/permissions/tsconfig.lib.json"
+      }
+    },
+    "snowflake": {
+      "type": "library",
+      "root": "libs/snowflake",
+      "entryFile": "index",
+      "sourceRoot": "libs/snowflake/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/snowflake/tsconfig.lib.json"
+      }
     }
   }
 }

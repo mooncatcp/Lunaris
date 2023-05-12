@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common'
-import { KeystoreService } from './keystore.service'
-import { KyselyModule } from '@app/kysely-adapter'
-import { CryptoModule } from '@app/crypto'
+import { KeystoreService } from '@app/keystore-server/keystore.service'
+import { KyselyModule } from '@app/kysely-adapter/kysely.module'
+import { CryptoModule } from '@app/crypto/crypto.module'
 
 @Module({
   providers: [ KeystoreService ],

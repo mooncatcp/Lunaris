@@ -1,16 +1,17 @@
 import { Module } from '@nestjs/common'
-import { MooncatConfigModule } from '@app/config'
-import { KyselyModule } from '@app/kysely-adapter'
+import { MooncatConfigModule } from '@app/config/config.module'
+import { KyselyModule } from '@app/kysely-adapter/kysely.module'
 import { ConfigModule } from '@nestjs/config'
 import { EventEmitterModule } from '@nestjs/event-emitter'
-import { ResponseModule } from '@app/response'
-import { KeystoreModule } from '@app/keystore-server'
+import { ResponseModule } from '@app/response/response.module'
+import { KeystoreModule } from '@app/keystore-server/keystore.module'
 import { KeystoreController } from './controllers/keystore.controller'
-import { CryptoModule } from '@app/crypto'
-import { MembersModule } from '@app/members'
-import { AuthModule } from '@app/auth'
+import { CryptoModule } from '@app/crypto/crypto.module'
+import { MembersModule } from '@app/members/members.module'
+import { AuthModule } from '@app/auth/auth.module'
 import { ChannelsController } from './controllers/channels.controller'
-import { ChannelsModule } from '@app/channels'
+import { ChannelsModule } from '@app/channels/channels.module'
+import { SnowflakeModule } from '@app/snowflake/snowflake.module'
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { ChannelsModule } from '@app/channels'
     MembersModule,
     AuthModule,
     ChannelsModule,
+    SnowflakeModule,
   ],
   controllers: [ KeystoreController, ChannelsController ],
 })

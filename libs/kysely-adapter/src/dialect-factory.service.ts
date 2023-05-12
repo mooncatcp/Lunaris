@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { DatabaseType, MooncatConfigService } from '@app/config'
+import { DatabaseType } from '@app/config/database-type.enum'
+import { MooncatConfigService } from '@app/config/config.service'
 import { Dialect, PostgresDialect, SqliteDialect } from 'kysely'
 import sqlite from 'better-sqlite3'
 import { Pool, PoolConfig } from 'pg'

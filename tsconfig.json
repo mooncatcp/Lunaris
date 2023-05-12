@@ -6,7 +6,7 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
-    "target": "es2017",
+    "target": "es2020",
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
@@ -71,9 +71,21 @@
       "@app/channels": [
         "libs/channels/src"
       ],
-        "@app/channels/*": [
-            "libs/channels/src/*"
-        ],
+      "@app/channels/*": [
+        "libs/channels/src/*"
+      ],
+      "@app/permissions": [
+        "libs/permissions/src"
+      ],
+      "@app/permissions/*": [
+        "libs/permissions/src/*"
+      ],
+      "@app/snowflake": [
+        "libs/snowflake/src"
+      ],
+      "@app/snowflake/*": [
+        "libs/snowflake/src/*"
+      ]
     }
   }
 }

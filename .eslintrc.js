@@ -45,6 +45,7 @@ module.exports = {
     'object-curly-spacing': [
       1, 'always',
     ],
+    'indent': [ 'error', 2 ],
     '@typescript-eslint/member-delimiter-style': [
       'error',
       {

@@ -1,7 +1,7 @@
 import { ConfigurableModuleBuilder, Module } from '@nestjs/common'
 import { KyselyService } from './kysely.service'
 import { DialectFactoryService } from './dialect-factory.service'
-import { MooncatConfigModule } from '@app/config'
+import { MooncatConfigModule } from '@app/config/config.module'
 import { StaticMigrationProviderService } from './static-migration-provider.service'
 
 const {

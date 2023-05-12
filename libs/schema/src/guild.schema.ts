@@ -45,6 +45,7 @@ export interface Message {
   iv: string
   lastUpdatedAt?: Date
   flags: number
+  encryptionType: 'e2ee' | 'aes'
 }
 
 // we can't add Attachment[] on message

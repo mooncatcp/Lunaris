@@ -1,5 +1,5 @@
 import { IsString } from 'class-validator'
-import { IsLogin } from '@app/schema'
+import { IsLogin } from '@app/schema/is-login.decorator'
 
 export class CreateLoginDto {
   @IsString()

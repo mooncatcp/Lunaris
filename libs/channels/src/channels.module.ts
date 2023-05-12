@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
-import { ChannelsService } from './channels.service'
-import { KyselyModule } from '@app/kysely-adapter'
+import { ChannelsService } from '@app/channels/channels.service'
+import { KyselyModule } from '@app/kysely-adapter/kysely.module'
 
 @Module({
   providers: [ ChannelsService ],

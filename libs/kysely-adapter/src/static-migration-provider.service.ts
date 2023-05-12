@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common'
 import { Migration, MigrationProvider } from 'kysely'
+// eslint-disable no-restricted-imports
 import { init0001 } from './migrations/00001_init'
 import { guilds00002 } from './migrations/00002_guilds'
 import { addUpdatedAt00003 } from './migrations/00003_add_updated_at'
 import { addFlagsAndOwner00004 } from './migrations/00004_add_flags_and_owner'
+import { addEncryptionType00005 } from './migrations/00005_add_encryption_type_to_message'
 
 @Injectable()
 export class StaticMigrationProviderService implements MigrationProvider {
@@ -13,6 +15,7 @@ export class StaticMigrationProviderService implements MigrationProvider {
       '0002_guilds': guilds00002,
       '0003_add_updated_at': addUpdatedAt00003,
       '0004_add_flags': addFlagsAndOwner00004,
+      '0005_add_encryption_type': addEncryptionType00005,
     }
   }
 }

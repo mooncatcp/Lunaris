@@ -1,8 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { DatabaseType, databaseTypeFromString } from './database-type.enum'
+import { DatabaseType, databaseTypeFromString } from '@app/config/database-type.enum'
 import { ConfigService } from '@nestjs/config'
 import * as crypto from 'crypto'
-import { CryptoService } from '@app/crypto'
+import { CryptoService } from '@app/crypto/crypto.service'
+import ms from 'ms'
 
 @Injectable()
 export class MooncatConfigService {
@@ -12,12 +13,19 @@ export class MooncatConfigService {
   debug: boolean
   appPort: number
   aesKey: crypto.KeyObject
+  tokenSignatureKey: Buffer
+  tokenLifespan: number
 
   constructor(config: ConfigService, cryptoService: CryptoService) {
     this.aesKey = cryptoService.importSecretKey(
-      Buffer.from(config.getOrThrow<string>('AES_KEY'), 'base64'),
+      Buffer.from(config.getOrThrow<string>('AES_KEY'), 'hex'),
     )
+    this.tokenSignatureKey = Buffer.from(config.getOrThrow<string>('TOKEN_SIGNATURE_KEY'), 'hex')
+
+    this.tokenLifespan = ms(config.get<string>('TOKEN_LIFESPAN') ?? '7d')
+
     this.debug = config.get<string>('DEBUG') === 'true'
+
     this.databaseType = databaseTypeFromString(config.getOrThrow('DB_TYPE'))
     const port = +(config.get<string>('APP_PORT') ?? 3000)
     if (isNaN(port)) {

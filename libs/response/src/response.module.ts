@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common'
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core'
-import { ResponseSerializerInterceptor } from './response.interceptor'
-import { AllExceptionsFilter } from './exceptions.filter'
+import { ResponseSerializerInterceptor } from '@app/response/response.interceptor'
+import { AllExceptionsFilter } from '@app/response/exceptions.filter'
 
 @Module({
   providers: [

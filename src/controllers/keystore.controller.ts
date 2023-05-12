@@ -1,7 +1,7 @@
 import { Body, Controller, Get, NotFoundException, Param, Post } from '@nestjs/common'
-import { KeystoreService } from '@app/keystore-server'
-import { Keystore } from '@app/schema'
-import { ErrorCode } from '@app/response'
+import { KeystoreService } from '@app/keystore-server/keystore.service'
+import { Keystore } from '@app/schema/keystore.schema'
+import { ErrorCode } from '@app/response/error-code.enum'
 import { CreateLoginDto } from '../dto/create-login.dto'
 
 @Controller('keystore')

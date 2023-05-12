@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common'
-import { MooncatConfigService } from './config.service'
+import { MooncatConfigService } from '@app/config/config.service'
 import { ConfigModule } from '@nestjs/config'
-import { CryptoModule } from '@app/crypto'
+import { CryptoModule } from '@app/crypto/crypto.module'
 
 @Module({
   exports: [ MooncatConfigService ],

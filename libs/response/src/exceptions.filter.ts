@@ -1,6 +1,6 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, Logger } from '@nestjs/common'
-import { Response, ResponseError } from './response.dto'
-import { ErrorCode } from './error-code.enum'
+import { Response, ResponseError } from '@app/response/response.dto'
+import { ErrorCode } from '@app/response/error-code.enum'
 import { FastifyReply } from 'fastify'
 import { instanceToPlain } from 'class-transformer'
 import WebSocket from 'ws'

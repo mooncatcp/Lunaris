@@ -1,4 +1,4 @@
-import { ErrorCode } from './error-code.enum'
+import { ErrorCode } from '@app/response/error-code.enum'
 
 export class Response<T> {
   declare ok: boolean

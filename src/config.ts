@@ -46,7 +46,9 @@ async function configure() {
       },
       {
         name: 'GENERATE_SECRETS',
-        message: 'Would you like to generate secrets? Warning: after you\'ve initialized your server, you cannot reset them without loosing data',
+        message:
+          'Would you like to generate secrets? ' +
+          'Warning: after you\'ve initialized your server, you cannot reset them without loosing data',
         type: 'confirm',
       },
     ],
@@ -73,6 +75,7 @@ async function configure() {
 
   if (answers['GENERATE_SECRETS'] === true) {
     answers['AES_KEY'] = crypto.randomBytes(16).toString('hex')
+    answers['TOKEN_SIGNATURE'] = crypto.randomBytes(32).toString('hex')
   }
 
   const out = output.trim()

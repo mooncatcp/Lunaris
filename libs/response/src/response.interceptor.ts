@@ -1,6 +1,6 @@
 import { CallHandler, ExecutionContext, NestInterceptor } from '@nestjs/common'
 import { map, Observable } from 'rxjs'
-import { Response } from './response.dto'
+import { Response } from '@app/response/response.dto'
 import { instanceToPlain } from 'class-transformer'
 
 export class ResponseSerializerInterceptor implements NestInterceptor {

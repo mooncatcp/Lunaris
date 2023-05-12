@@ -1,4 +1,4 @@
-import { Keystore } from './keystore.schema'
+import { Keystore } from '@app/schema/keystore.schema'
 import {
   Attachment,
   Channel,

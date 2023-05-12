@@ -1,8 +1,9 @@
 import { BadRequestException, ConflictException, Injectable } from '@nestjs/common'
-import { KyselyService } from '@app/kysely-adapter'
-import { Keystore, DB } from '@app/schema'
-import { ErrorCode } from '@app/response'
-import { CryptoService } from '@app/crypto'
+import { KyselyService } from '@app/kysely-adapter/kysely.service'
+import { DB } from '@app/schema/db.schema'
+import { Keystore } from '@app/schema/keystore.schema'
+import { ErrorCode } from '@app/response/error-code.enum'
+import { CryptoService } from '@app/crypto/crypto.service'
 
 @Injectable()
 export class KeystoreService {

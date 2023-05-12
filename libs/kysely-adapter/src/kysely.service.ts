@@ -2,7 +2,7 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { Kysely, LogEvent, Migrator, QueryLogEvent } from 'kysely'
 import { DialectFactoryService } from './dialect-factory.service'
 import { StaticMigrationProviderService } from './static-migration-provider.service'
-import { MooncatConfigService } from '@app/config'
+import { MooncatConfigService } from '@app/config/config.service'
 
 @Injectable()
 export class KyselyService<T> extends Kysely<T> implements OnModuleInit {
