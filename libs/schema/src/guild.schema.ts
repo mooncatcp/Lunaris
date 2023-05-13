@@ -10,8 +10,8 @@ export interface Guild {
 export interface Role {
   id: string
   name: string
-  color: Generated<number>
-  permissions: Generated<number>
+  color: number
+  permissions: number
   position: number
 }
 

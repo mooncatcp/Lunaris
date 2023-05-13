@@ -1,17 +1,19 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { Role } from '@app/schema/guild.schema'
 import { DB } from '@app/schema/db.schema'
-import { ALL, has, merge } from '@app/permissions/permissions.enum'
+import { ALL, DEFAULT_GUILD_PERMISSIONS, has, merge } from '@app/permissions/permissions.enum'
 import { KyselyService } from '@app/kysely-adapter/kysely.service'
 import { MembersService } from '@app/members/members.service'
 import { ErrorCode } from '@app/response/error-code.enum'
 import { OnEvent } from '@nestjs/event-emitter'
+import { SnowflakeService } from '@app/snowflake/snowflake.service'
 
 @Injectable()
 export class RolesService {
   constructor(
     private readonly db: KyselyService<DB>,
     private readonly members: MembersService,
+    private readonly snowflake: SnowflakeService,
   ) {}
 
   async getUserRoles(member: string) {
@@ -59,11 +61,79 @@ export class RolesService {
     }
   }
 
+  async canUpdateRolePositions(editorsHighestRole: number, positions: ({ id: string; position: number })[]) {
+    const pos = new Set<string>()
+    positions.forEach(c => {
+      if (pos.has(c.id)) {
+        throw new BadRequestException({ code: ErrorCode.SamePositionRoles })
+      } else {
+        pos.add(c.id)
+      }
+    })
+    const asMap = new Map(positions.map(({ id, position }) => [ id, position ]))
+
+    if (editorsHighestRole !== -1) {
+      const currentPositions = await this.db.selectFrom('role')
+        .select([ 'role.position', 'role.id' ])
+        .execute()
+
+      for (const curPos of currentPositions) {
+        if (curPos.position >= editorsHighestRole && curPos.position !== asMap.get(curPos.id)) {
+          throw new BadRequestException({ code: ErrorCode.CantMoveRole })
+        }
+      }
+    }
+  }
+
+  async updateRolePositions(positions: ({ id: string; position: number })[], editorsHighestRole = -1) {
+    await this.canUpdateRolePositions(editorsHighestRole, positions)
+
+    for (const role of positions) {
+      await this.enforceExists(role.id)
+      await this.db.updateTable('role')
+        .where('id', '=', role.id)
+        .set({
+          position: role.position,
+        })
+        .execute()
+    }
+  }
+
+  async updateRole(id: string, name: string, color: number, permissions: number) {
+    await this.enforceExists(id)
+    return this.db.updateTable('role')
+      .where('id', '=', id)
+      .set({ name, color, permissions })
+      .execute()
+  }
+
+  async createRole(name: string, idOverride?: string) {
+    const id = idOverride ?? this.snowflake.nextStringId()
+
+    await this.db.updateTable('role')
+      .set(({ bxp }) => ({
+        position: bxp('position', '+', 1),
+      }))
+      .execute()
+    await this.db.insertInto('role')
+      .values({
+        id,
+        name,
+        color: 0xffffff,
+        permissions: DEFAULT_GUILD_PERMISSIONS,
+        position: 0,
+      })
+      .execute()
+    
+    return
+  }
+
   // todo: create role, create everyone role
 
   @OnEvent('app.init')
   async createEveryoneRole() {
-    console.log('creating everyone role')
+    const owner = await this.members.getOwner()
+    await this.createRole('everyone', owner!.id)
   }
 
   async getEveryoneRole(): Promise<Role> {

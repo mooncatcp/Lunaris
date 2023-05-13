@@ -5,25 +5,70 @@ import { channelPermissions, checkValid, resolve } from '@app/permissions/permis
 import { PermissionOverwrite } from '@app/schema/guild.schema'
 import { SnowflakeService } from '@app/snowflake/snowflake.service'
 import { ErrorCode } from '@app/response/error-code.enum'
+import { RolesService } from '@app/members/roles.service'
 
 @Injectable()
 export class PermissionOverwritesService {
   constructor(
     private readonly db: KyselyService<DB>,
     private readonly snowflakes: SnowflakeService,
+    private readonly roles: RolesService,
   ) {}
 
-  async getResolvedPermissionOverwrites(id: string, channelId: string) {
-    const overwrites = await this.db
-      .selectFrom('permissionOverwrite')
-      .where('channelId', '=', channelId)
-      .where(({ or, cmpr }) => or([ cmpr('memberId', '=', id), cmpr('roleId', '=', id) ]))
+  async getResolvedPermissionOverwrites(member: string, channelId: string) {
+    const basePermissions = await this.roles.calculateGuildPermissions(member)
+    const roles = await this.roles.getUserRoles(member)
+    const overwritesForRoles = await this.db.selectFrom('permissionOverwrite')
+      .where(({ and, cmpr }) =>
+        and([
+          cmpr('roleId', 'in', roles),
+          cmpr('channelId', '=', channelId),
+        ]),
+      )
+      .selectAll()
+      .execute()
+    const everyoneRole = await this.roles.getEveryoneRole()
+    const everyoneOverwrite = await this.db.selectFrom('permissionOverwrite')
+      .where(({ and, cmpr }) =>
+        and([
+          cmpr('roleId', '=', everyoneRole.id),
+          cmpr('channelId', '=', channelId),
+        ]),
+      )
       .selectAll()
       .executeTakeFirst()
 
+    if (everyoneOverwrite !== undefined) {
+      overwritesForRoles.push(everyoneOverwrite)
+    }
 
-    if (!overwrites) return undefined
-    else return resolve(overwrites.allow, overwrites.deny)
+    let permissions = basePermissions
+    let allow = 0
+    let deny = 0
+
+    for (const roleOverwrite of overwritesForRoles) {
+      allow |= roleOverwrite.allow
+      deny |= roleOverwrite.deny
+    }
+
+    permissions &= ~deny
+    permissions |= allow
+
+    const memberOverwrite = await this.db.selectFrom('permissionOverwrite')
+      .where(({ and, cmpr }) =>
+        and([
+          cmpr('memberId', '=', member),
+          cmpr('channelId', '=', channelId),
+        ]),
+      )
+      .selectAll()
+      .executeTakeFirst()
+    if (memberOverwrite !== undefined) {
+      permissions |= memberOverwrite.allow
+      permissions &= ~memberOverwrite.deny
+    }
+
+    return permissions
   }
 
   async getPermissionOverwrites(channelId: string) {

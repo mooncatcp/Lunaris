@@ -7,6 +7,7 @@ export enum Permissions {
   READ_MESSAGES = 1 << 5,
   SEND_MESSAGES = 1 << 6,
   MANAGE_CHANNEL = 1 << 7,
+  ADMINISTRATOR = 1 << 8,
 }
 
 export const channelPermissions = [

@@ -80,6 +80,13 @@ export class MembersService {
     return member.id
   }
 
+  async getOwner() {
+    return this.db.selectFrom('member')
+      .where('isOwner', '=', true)
+      .selectAll()
+      .executeTakeFirst()
+  }
+
   async getByKey(key: crypto.KeyObject) {
     const exported = this.crypto.exportKey(key)
     return this.db
