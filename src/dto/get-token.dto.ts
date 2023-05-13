@@ -6,6 +6,11 @@ export class GetTokenDto {
   @IsHexadecimal()
   declare authRequestId: string
 
+  /** User's public key. */
+  @IsString()
+  @IsBase64()
+  declare publicKey: string
+
   /** Data of the auth request signed with the private key. */
   @IsString()
   @IsBase64()

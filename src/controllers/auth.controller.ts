@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post, UnauthorizedException } from '@nestjs/common'
+import { Body, Controller, NotFoundException, Post, UnauthorizedException } from '@nestjs/common'
 import { TokenService } from '@app/auth/token.service'
 import { GetTokenDto } from '../dto/get-token.dto'
 import { CryptoService } from '@app/crypto/crypto.service'
@@ -17,13 +17,17 @@ export class AuthController {
 
   /** Get a token for user using their signature. */
   @Post('token/:id')
-  async getToken(@Param('id') userId: string, @Body() dto: GetTokenDto) {
+  async getToken(@Body() dto: GetTokenDto) {
     const signature = Buffer.from(dto.signature, 'base64')
-    const member = await this.members.get(userId)
-    const publicKey = this.crypto.importPublicKey(Buffer.from(member.publicKey, 'base64'))
+    const publicKey = this.crypto.importPublicKey(Buffer.from(dto.publicKey, 'base64'))
+    const member = await this.members.getByKey(publicKey)
+    
+    if (member === undefined) {
+      throw new NotFoundException({ code: ErrorCode.UnknownMember })
+    }
 
     if (await this.token.verifyAuth(dto.authRequestId, signature, publicKey)) {
-      return this.token.issueToken(userId)
+      return this.token.issueToken(member.id)
     } else {
       throw new UnauthorizedException({ code: ErrorCode.InvalidSignature })
     }
