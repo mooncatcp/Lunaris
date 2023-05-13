@@ -8,6 +8,8 @@ export enum ErrorCode {
   InvalidSignature,
   NoTokenProvided,
   NoPermissions,
+  InvalidPermissions,
+  InvalidChannelType,
   LoginAlreadyTaken = 20000,
   PublicKeyAlreadyRegistered,
   UnknownLogin = 30000,

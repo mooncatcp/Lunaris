@@ -14,6 +14,7 @@ import { ChannelsController } from './controllers/channels.controller'
 import { KeystoreController } from './controllers/keystore.controller'
 import { AuthController } from './controllers/auth.controller'
 import { MembersController } from './controllers/members.controller'
+import { PermissionOverwritesModule } from '@app/permissions/permissions.module'
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { MembersController } from './controllers/members.controller'
     AuthModule,
     ChannelsModule,
     SnowflakeModule,
+    PermissionOverwritesModule,
   ],
   controllers: [
     KeystoreController,

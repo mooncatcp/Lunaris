@@ -7,6 +7,7 @@ import { CryptoModule } from '@app/crypto/crypto.module'
 import { APP_GUARD } from '@nestjs/core'
 import { AuthGuard } from '@app/auth/auth.guard'
 import { CacheModule } from '@nestjs/cache-manager'
+import { PermissionOverwritesModule } from '@app/permissions/permissions.module'
 
 @Module({
   providers: [
@@ -23,6 +24,7 @@ import { CacheModule } from '@nestjs/cache-manager'
     MooncatConfigModule,
     CryptoModule,
     CacheModule.register(),
+    PermissionOverwritesModule,
   ],
 })
 export class AuthModule {}

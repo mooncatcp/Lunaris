@@ -58,8 +58,8 @@ export interface Attachment {
 export interface PermissionOverwrite {
   id: string
   type: 'role' | 'member'
-  deny: Generated<number>
-  allow: Generated<number>
+  deny: number
+  allow: number
   // memberId and roleId are mutually exclusive
   // separate properties because each column can only
   // link to one table(roles and members are stored in different tables).

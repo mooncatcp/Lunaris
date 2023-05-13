@@ -3,3 +3,4 @@ DB_TYPE=sqlite/postgres
 DB_DSN=sqlite.db/postgresql://...
 DEBUG=false/true
 AES_KEY=random aes key, length 256 bits
+TOKEN_SIGNATURE_KEY=random key
