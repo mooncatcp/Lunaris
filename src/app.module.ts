@@ -5,13 +5,15 @@ import { ConfigModule } from '@nestjs/config'
 import { EventEmitterModule } from '@nestjs/event-emitter'
 import { ResponseModule } from '@app/response/response.module'
 import { KeystoreModule } from '@app/keystore-server/keystore.module'
-import { KeystoreController } from './controllers/keystore.controller'
 import { CryptoModule } from '@app/crypto/crypto.module'
 import { MembersModule } from '@app/members/members.module'
 import { AuthModule } from '@app/auth/auth.module'
-import { ChannelsController } from './controllers/channels.controller'
 import { ChannelsModule } from '@app/channels/channels.module'
 import { SnowflakeModule } from '@app/snowflake/snowflake.module'
+import { ChannelsController } from './controllers/channels.controller'
+import { KeystoreController } from './controllers/keystore.controller'
+import { AuthController } from './controllers/auth.controller'
+import { MembersController } from './controllers/members.controller'
 
 @Module({
   imports: [
@@ -29,6 +31,11 @@ import { SnowflakeModule } from '@app/snowflake/snowflake.module'
     ChannelsModule,
     SnowflakeModule,
   ],
-  controllers: [ KeystoreController, ChannelsController ],
+  controllers: [
+    KeystoreController,
+    ChannelsController,
+    AuthController,
+    MembersController,
+  ],
 })
 export class AppModule {}

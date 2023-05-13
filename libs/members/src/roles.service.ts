@@ -49,7 +49,7 @@ export class RolesService {
 
   @OnEvent('app.init')
   async createEveryoneRole() {
-    // ...
+    console.log('creating everyone role')
   }
 
   async getEveryoneRole(): Promise<Role> {

@@ -1,4 +1,11 @@
-import { forwardRef, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
+import {
+  ConflictException,
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common'
 import { KyselyService } from '@app/kysely-adapter/kysely.service'
 import { DB } from '@app/schema/db.schema'
 import { ErrorCode } from '@app/response/error-code.enum'
@@ -19,17 +26,42 @@ export class MembersService {
     private readonly emitter: EventEmitter2,
     private readonly snowflakes: SnowflakeService,
   ) {}
+
+  async updateMember(id: string, username: string, avatar?: string) {
+    await this.enforceExists(id)
+    return this.db.updateTable('member')
+      .where('member.id', '=', id)
+      .set({ username, avatar })
+      .execute()
+  }
+
+  async get(id: string) {
+    const member = await this.db.selectFrom('member')
+      .where('member.id', '=', id)
+      .selectAll()
+      .executeTakeFirst()
+    if (member === undefined) {
+      throw new NotFoundException({ code: ErrorCode.UnknownMember })
+    }
+
+    return member
+  }
   
-  async createUser(
+  async createMember(
     publicKey: crypto.KeyObject, 
     username: string, 
     signId: string, 
     signedData: Buffer,
   ) {
-    if (!this.tokens.verifyAuth(signId, signedData, publicKey)) {
+    if (!await this.tokens.verifyAuth(signId, signedData, publicKey)) {
       throw new UnauthorizedException({ code: ErrorCode.InvalidSignature })
     }
     const exported = this.crypto.exportKey(publicKey).toString('base64')
+
+    if ((await this.getByKey(publicKey)) !== undefined) {
+      throw new ConflictException({ code: ErrorCode.PublicKeyAlreadyRegistered })
+    }
+
     const total = await this.totalMembers()
     const member: Member = {
       id: this.snowflakes.nextStringId(),
@@ -41,7 +73,20 @@ export class MembersService {
       .values(member)
       .execute()
 
+    if (total === 0) {
+      await this.emitter.emitAsync('app.init')
+    }
+
     return member.id
+  }
+
+  async getByKey(key: crypto.KeyObject) {
+    const exported = this.crypto.exportKey(key)
+    return this.db
+      .selectFrom('member')
+      .selectAll()
+      .where('member.publicKey', '=', exported.toString('base64'))
+      .executeTakeFirst()
   }
 
   async totalMembers() {

@@ -18,12 +18,16 @@ export class AuthGuard implements CanActivate {
       context.getHandler(),
       context.getClass,
     ])
-    if (requireAuth !== true) return true
 
     const fastifyRequest =
       context.switchToHttp().getRequest<WithToken<FastifyRequest>>()
+
     if (fastifyRequest.headers.authorization === undefined)
-      throw new UnauthorizedException({ code: ErrorCode.InvalidTokenFormat })
+      if (requireAuth)
+        throw new UnauthorizedException({ code: ErrorCode.InvalidTokenFormat })
+      else
+        return true
+
     fastifyRequest[TOKEN_KEY] = this.tokens.decodeToken(fastifyRequest.headers.authorization)
     return true
   }

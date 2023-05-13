@@ -13,6 +13,7 @@ import { ErrorCode } from '@app/response/error-code.enum'
 import { CreateChannelDto } from '../dto/create-channel.dto'
 import { UpdateChannelDto } from '../dto/update-channel.dto'
 import { AuthService } from '@app/auth/auth.service'
+import { SnowflakeService } from '@app/snowflake/snowflake.service'
 
 
 @Controller('channels')
@@ -20,6 +21,7 @@ export class ChannelsController {
   constructor(
     private readonly channelsService: ChannelsService,
     private readonly auth: AuthService,
+    private readonly snowflake: SnowflakeService,
   ) {}
 
   @Get()
@@ -36,7 +38,7 @@ export class ChannelsController {
 
   @Post()
   async createChannel(@Body() data: CreateChannelDto) {
-    const id = ((Math.random() * 1000)|0).toString() // TODO: Flake Generator
+    const id = this.snowflake.nextStringId()
     const { name, type, parentId, description } = data
 
     await this.channelsService.createChannel({
@@ -56,7 +58,6 @@ export class ChannelsController {
     if (!channel) throw new NotFoundException({ code: ErrorCode.UnknownChannel })
 
     const { name, parentId, description } = data
-    if (!name && !parentId && !description) throw new BadRequestException({ code: ErrorCode.NothingToModify })
     await this.channelsService.modifyChannel(id, { name, parentId, description })
     return null
   }

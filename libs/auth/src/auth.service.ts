@@ -14,6 +14,4 @@ export class AuthService {
   forUser(user: string): Authorizer {
     return new Authorizer(this.members, this.roles, user)
   }
-
-  createToken() {}
 }

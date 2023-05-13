@@ -37,3 +37,5 @@ lerna-debug.log*
 .mooncatrc
 *.db
 docker-compose.yml
+
+private/

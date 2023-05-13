@@ -1,34 +1,48 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common'
+import { Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { Token, TokenPayload } from '@app/auth/token.interface'
 import { ErrorCode } from '@app/response/error-code.enum'
 import { MooncatConfigService } from '@app/config/config.service'
 import { CryptoService } from '@app/crypto/crypto.service'
 import * as crypto from 'crypto'
+import { Cache } from 'cache-manager'
+import { CACHE_MANAGER } from '@nestjs/cache-manager'
+import ms from 'ms'
 
 @Injectable()
 export class TokenService {
-  private readonly authRequests = new Map<string, Buffer>()
-
   constructor(
     private readonly config: MooncatConfigService,
     private readonly crypto: CryptoService,
+    @Inject(CACHE_MANAGER) private readonly cache: Cache,
   ) {}
+  
+  private readonly authRequestKey = (id: string) => `authRequest:${id}`
+  
+  async getAuthData(id: string) {
+    const data = await this.cache.get<Buffer>(this.authRequestKey(id))
+    
+    if (data === undefined) {
+      throw new NotFoundException({ code: ErrorCode.UnknownAuthRequest })
+    }
+    
+    return data
+  }
 
-  verifyAuth(id: string, signature: Buffer, publicKey: crypto.KeyObject): boolean {
-    const data = this.authRequests.get(id)
+  async verifyAuth(id: string, signature: Buffer, publicKey: crypto.KeyObject): Promise<boolean> {
+    const data = await this.cache.get<Buffer>(this.authRequestKey(id))
     if (data === undefined) {
       return false
     }
-    this.authRequests.delete(id)
+    await this.cache.del(this.authRequestKey(id))
 
     return this.crypto.verify(data, signature, publicKey)
   }
 
-  beginAuth(): string {
+  async beginAuth(): Promise<string> {
     const id = crypto.randomBytes(16).toString('hex')
     const dataToBeSigned = crypto.randomBytes(16)
 
-    this.authRequests.set(id, dataToBeSigned)
+    await this.cache.set(this.authRequestKey(id), dataToBeSigned, ms('10min'))
 
     return id
   }
@@ -41,7 +55,7 @@ export class TokenService {
     const bufferData = Buffer.from(jsonData)
     const signature = this.crypto.serverSign(bufferData, this.config.tokenSignatureKey)
 
-    return `${bufferData.toString('base64')}.${signature.toString('base64')}}`
+    return `${bufferData.toString('base64')}.${signature.toString('base64')}`
   }
 
   issueToken(forUser: string) {
@@ -60,7 +74,7 @@ export class TokenService {
     }
 
     const rawJson = Buffer.from(segments[0], 'base64')
-    const signature = Buffer.from(segments[0], 'base64')
+    const signature = Buffer.from(segments[1], 'base64')
     const jsonData = JSON.parse(rawJson.toString())
     if (typeof jsonData.userId !== 'string' || typeof jsonData.validUntil !== 'number') {
       throw new UnauthorizedException({ code: ErrorCode.InvalidTokenFormat })

@@ -16,7 +16,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
     response.result = null
     response.ok = false
     response.errors = []
-    const asString = () => JSON.stringify(instanceToPlain(response))
 
     let responseCode = 400
 
@@ -27,34 +26,29 @@ export class AllExceptionsFilter implements ExceptionFilter {
       error.details = []
 
       if (exception.getResponse() instanceof Object) {
-        const body = (exception.getResponse() as { code?: ErrorCode; details?: any[] })
+        const body = (exception.getResponse() as { code?: ErrorCode; details?: any[]; message?: any })
         if (body?.code) error.code = body.code
-        if (body?.details) error.details = body.details
+        let details = body.details
+        if (Array.isArray(body.message)) {
+          details = body.message
+        }
+
+        error.details.push(...(details ?? []))
       }
 
       response.errors.push(error)
       responseCode = exception.getStatus()
-    } else if (Array.isArray(exception) && exception.length > 0 && exception[0] instanceof ValidationError) {
-      responseCode = 400
-      for (const error of (exception as ValidationError[])) {
-        const responseError = new ResponseError()
-        responseError.code = ErrorCode.InvalidKeyFormat
-        responseError.message = error.toString()
-        responseError.details = [ error.property ]
-        response.errors.push(responseError)
-      }
     } else if (exception instanceof Error) responseCode = 500
-
     if (host.getType() === 'http') {
       const httpHost = host.switchToHttp()
       const reply = httpHost.getResponse<FastifyReply>()
 
-      reply.status(responseCode).header('Content-Type', 'application/json').send(asString())
+      reply.status(responseCode).header('Content-Type', 'application/json').send(instanceToPlain(response))
     } else if (host.getType() === 'ws') {
       const wsHost = host.switchToWs()
       const socket = wsHost.getClient<WebSocket>()
 
-      socket.send(asString())
+      socket.send(JSON.stringify(instanceToPlain(response)))
     }
   }
 }

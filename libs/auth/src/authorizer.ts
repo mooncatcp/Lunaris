@@ -11,12 +11,22 @@ export class Authorizer {
     private readonly user: string,
   ) {}
 
-  async canOnMember(onMember: string, perm: number) {
-    return this.roles.canOnMember(
+  isMember(another: string) {
+    if (another !== this.user) {
+      throw new ForbiddenException({ code: ErrorCode.NoPermissions })
+    }
+  }
+
+  async onMember(onMember: string, perm: number) {
+    const is = await this.roles.canOnMember(
       this.user,
       onMember,
       perm,
     )
+
+    if (!is) {
+      throw new ForbiddenException({ code: ErrorCode.NoPermissions })
+    }
   }
 
   async hasPermission(perm: number) {
@@ -25,7 +35,7 @@ export class Authorizer {
       perm,
     )
     if (!h) {
-      throw new ForbiddenException({ code: ErrorCode.Unauthorized })
+      throw new ForbiddenException({ code: ErrorCode.NoPermissions })
     }
   }
 }

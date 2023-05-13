@@ -7,9 +7,12 @@ export enum ErrorCode {
   InvalidTokenFormat,
   InvalidSignature,
   NoTokenProvided,
+  NoPermissions,
   LoginAlreadyTaken = 20000,
+  PublicKeyAlreadyRegistered,
   UnknownLogin = 30000,
   UnknownChannel,
   UnknownRole,
   UnknownMember,
+  UnknownAuthRequest,
 }

@@ -6,6 +6,7 @@ import { MooncatConfigModule } from '@app/config/config.module'
 import { CryptoModule } from '@app/crypto/crypto.module'
 import { APP_GUARD } from '@nestjs/core'
 import { AuthGuard } from '@app/auth/auth.guard'
+import { CacheModule } from '@nestjs/cache-manager'
 
 @Module({
   providers: [
@@ -17,6 +18,11 @@ import { AuthGuard } from '@app/auth/auth.guard'
     },
   ],
   exports: [ AuthService, TokenService ],
-  imports: [ forwardRef(() => MembersModule), MooncatConfigModule, CryptoModule ],
+  imports: [
+    forwardRef(() => MembersModule),
+    MooncatConfigModule,
+    CryptoModule,
+    CacheModule.register(),
+  ],
 })
 export class AuthModule {}

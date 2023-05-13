@@ -46,7 +46,7 @@ export class ChannelsService {
       .execute()
   }
 
-  async modifyChannel(id: string, newData: { name?: string; parentId?: string; description?: string }) {
+  async modifyChannel(id: string, newData: { name: string; parentId?: string; description?: string }) {
     await this.enforceExists(id)
     return await this.db
       .updateTable('channel')
