@@ -58,7 +58,7 @@ export class ChannelsController {
     @TokenData() tokenData: TokenPayload,
   ) {
     const authr = await this.auth.forUser(tokenData.userId)
-    await authr.hasPermission(Permissions.MANAGE_CHANNELS)
+    await authr.hasPermissions(Permissions.MANAGE_CHANNELS, Permissions.MANAGE_CHANNEL)
 
     const id = this.snowflake.nextStringId()
     const { name, type, parentId, description } = data
@@ -89,7 +89,7 @@ export class ChannelsController {
     @Body() data: UpdateChannelDto,
   ) {
     const authr = await this.auth.forUser(tokenData.userId)
-    await authr.hasPermission(Permissions.MANAGE_CHANNELS)
+    await authr.hasPermissions(Permissions.MANAGE_CHANNELS, Permissions.MANAGE_CHANNEL)
 
     const channel = await this.channelsService.getChannel(id)
     if (!channel) throw new NotFoundException({ code: ErrorCode.UnknownChannel })
@@ -106,7 +106,7 @@ export class ChannelsController {
     @TokenData() tokenData: TokenPayload,
   ) {
     const authr = await this.auth.forUser(tokenData.userId)
-    await authr.hasPermission(Permissions.MANAGE_CHANNELS)
+    await authr.hasPermissions(Permissions.MANAGE_CHANNELS, Permissions.MANAGE_CHANNEL)
 
     const channel = await this.channelsService.getChannel(id)
     if (!channel) throw new NotFoundException({ code: ErrorCode.UnknownChannel })
@@ -123,7 +123,7 @@ export class ChannelsController {
     @Body() data: CreatePermissionOverwriteDto,
   ) {
     const authr = await this.auth.forUser(tokenData.userId)
-    await authr.hasPermission(Permissions.MANAGE_CHANNELS)
+    await authr.hasPermissions(Permissions.MANAGE_CHANNELS, Permissions.MANAGE_CHANNEL)
 
     const channel = await this.channelsService.getChannel(id)
     if (!channel) throw new NotFoundException({ code: ErrorCode.UnknownChannel })
@@ -142,7 +142,7 @@ export class ChannelsController {
     @Body() data: UpdatePermissionOverwriteDto,
   ) {
     const authr = await this.auth.forUser(tokenData.userId)
-    await authr.hasPermission(Permissions.MANAGE_CHANNELS)
+    await authr.hasPermissions(Permissions.MANAGE_CHANNELS, Permissions.MANAGE_CHANNEL)
 
     const channel = await this.channelsService.getChannel(id)
     if (!channel) throw new NotFoundException({ code: ErrorCode.UnknownChannel })
@@ -160,7 +160,7 @@ export class ChannelsController {
     @TokenData() tokenData: TokenPayload,
   ) {
     const authr = await this.auth.forUser(tokenData.userId)
-    await authr.hasPermission(Permissions.MANAGE_CHANNELS)
+    await authr.hasPermissions(Permissions.MANAGE_CHANNELS, Permissions.MANAGE_CHANNEL)
 
     const channel = await this.channelsService.getChannel(id)
     if (!channel) throw new NotFoundException({ code: ErrorCode.UnknownChannel })

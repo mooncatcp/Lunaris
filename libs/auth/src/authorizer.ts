@@ -41,6 +41,10 @@ export class Authorizer {
     }
   }
 
+  async hasPermissions(...perms: number[]) {
+    for (const perm of perms) await this.hasPermission(perm)
+  }
+
   async hasPermissionOnChannel(channelId: string, perm: number) {
     const overwrites = await this.permissionsOverwrites.getResolvedPermissionOverwrites(this.user, channelId)
     if (!overwrites) return this.hasPermission(perm)
