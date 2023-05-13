@@ -7,6 +7,7 @@ import { TokenData } from '@app/auth/token.decorator'
 import { TokenPayload } from '@app/auth/token.interface'
 import { RequireAuth } from '@app/auth/auth.decorator'
 import { UpdateMemberDto } from '../dto/update-member.dto'
+import { RolesService } from '@app/members/roles.service'
 
 @Controller('members')
 export class MembersController {
@@ -14,12 +15,18 @@ export class MembersController {
     private readonly members: MembersService,
     private readonly crypto: CryptoService,
     private readonly auth: AuthService,
+    private readonly roles: RolesService,
   ) {}
 
   @Get(':id')
   async getMember(@Param('id') userId: string) {
     // todo: add @me
-    return this.members.get(userId)
+    const member = await this.members.get(userId)
+
+    return {
+      ...member,
+      roles: await this.roles.getUserRoles(userId),
+    }
   }
 
   @Patch(':id')

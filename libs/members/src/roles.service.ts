@@ -14,6 +14,20 @@ export class RolesService {
     private readonly members: MembersService,
   ) {}
 
+  async getUserRoles(member: string) {
+    await this.members.enforceExists(member)
+    return this.db
+      .selectFrom('roleMember')
+      .where('roleMember.memberId', '=', member)
+      .select([
+        'roleMember.roleId',
+      ])
+      .execute()
+      .then(e =>
+        e.filter(v => v !== null).map(e => e.roleId as string),
+      )
+  }
+
   async canOnMember(executor: string, subject: string, permissionsRequired: number): Promise<boolean> {
     if (await this.members.isOwner(executor)) return true
     const permissions = await this.calculateGuildPermissions(executor)
