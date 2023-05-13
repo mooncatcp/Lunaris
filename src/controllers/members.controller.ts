@@ -8,8 +8,10 @@ import { TokenPayload } from '@app/auth/token.interface'
 import { RequireAuth } from '@app/auth/auth.decorator'
 import { UpdateMemberDto } from '../dto/update-member.dto'
 import { RolesService } from '@app/members/roles.service'
+import { ApiTags } from '@nestjs/swagger'
 
 @Controller('members')
+@ApiTags('Members')
 export class MembersController {
   constructor(
     private readonly members: MembersService,
@@ -18,6 +20,7 @@ export class MembersController {
     private readonly roles: RolesService,
   ) {}
 
+  /** Get a member by id. */
   @Get(':id')
   async getMember(@Param('id') userId: string) {
     // todo: add @me
@@ -29,6 +32,7 @@ export class MembersController {
     }
   }
 
+  /** Update a member. A member can only be updated by the member itself. */
   @Patch(':id')
   @RequireAuth()
   async updateMember(

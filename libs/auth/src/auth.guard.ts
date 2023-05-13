@@ -27,8 +27,12 @@ export class AuthGuard implements CanActivate {
         throw new UnauthorizedException({ code: ErrorCode.InvalidTokenFormat })
       else
         return true
+    const segments = fastifyRequest.headers.authorization.split(' ')
+    if (segments.length !== 2 || segments[0] !== 'Bearer') {
+      throw new UnauthorizedException({ code: ErrorCode.InvalidTokenFormat })
+    }
 
-    fastifyRequest[TOKEN_KEY] = this.tokens.decodeToken(fastifyRequest.headers.authorization)
+    fastifyRequest[TOKEN_KEY] = this.tokens.decodeToken(segments[1])
     return true
   }
 }

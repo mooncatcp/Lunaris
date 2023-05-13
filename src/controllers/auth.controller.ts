@@ -4,8 +4,10 @@ import { GetTokenDto } from '../dto/get-token.dto'
 import { CryptoService } from '@app/crypto/crypto.service'
 import { MembersService } from '@app/members/members.service'
 import { ErrorCode } from '@app/response/error-code.enum'
+import { ApiTags } from '@nestjs/swagger'
 
 @Controller('auth')
+@ApiTags('Authorization')
 export class AuthController {
   constructor(
     private readonly token: TokenService,
@@ -13,6 +15,7 @@ export class AuthController {
     private readonly members: MembersService,
   ) {}
 
+  /** Get a token for user using their signature. */
   @Post('token/:id')
   async getToken(@Param('id') userId: string, @Body() dto: GetTokenDto) {
     const signature = Buffer.from(dto.signature, 'base64')
@@ -26,6 +29,7 @@ export class AuthController {
     }
   }
 
+  /** Creates an auth request. */
   @Post()
   async createAuthRequest() {
     const id = await this.token.beginAuth()
