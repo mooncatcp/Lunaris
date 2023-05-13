@@ -72,6 +72,10 @@ export class RolesService {
     })
     const asMap = new Map(positions.map(({ id, position }) => [ id, position ]))
 
+    for (const position of positions) {
+      await this.enforceExists(position.id)
+    }
+
     if (editorsHighestRole !== -1) {
       const currentPositions = await this.db.selectFrom('role')
         .select([ 'role.position', 'role.id' ])
@@ -87,7 +91,6 @@ export class RolesService {
 
   async updateRolePositions(positions: ({ id: string; position: number })[], editorsHighestRole = -1) {
     await this.canUpdateRolePositions(editorsHighestRole, positions)
-
     for (const role of positions) {
       await this.enforceExists(role.id)
       await this.db.updateTable('role')
