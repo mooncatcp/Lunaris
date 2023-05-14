@@ -56,14 +56,6 @@ export class Authorizer {
     }
   }
 
-  async hasPermissions(...perms: number[]) {
-    const h = perms.some(async (perm) => has(
-      await this.roles.calculateGuildPermissions(this.user),
-      perm,
-    ))
-    if (!h) throw new ForbiddenException({ code: ErrorCode.NoPermissions })
-  }
-
   async hasPermissionOnChannel(channelId: string, perm: number) {
     const overwrites = await this.permissionsOverwrites.getResolvedPermissionOverwrites(this.user, channelId)
     if (!overwrites) return this.hasPermission(perm)
