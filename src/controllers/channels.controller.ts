@@ -59,18 +59,9 @@ export class ChannelsController {
     const authr = await this.auth.forUser(tokenData.userId)
     await authr.hasPermission(Permissions.MANAGE_CHANNELS, data.parentId)
 
-    const id = this.snowflake.nextStringId()
     const { name, type, parentId, description } = data
-    if (parentId) {
-      const parent = await this.channelsService.getChannel(parentId)
-      if (!parent)
-        throw new BadRequestException({ code: ErrorCode.UnknownChannel, details: [ 'Unknown parent channel' ] })
-      if (parent.type !== 'category' || type === 'category')
-        throw new BadRequestException({ code: ErrorCode.InvalidChannelType })
-    }
 
-    await this.channelsService.createChannel({
-      id,
+    const id = await this.channelsService.createChannel({
       name,
       type,
       parentId,
@@ -90,9 +81,6 @@ export class ChannelsController {
   ) {
     const authr = await this.auth.forUser(tokenData.userId)
     await authr.hasPermission(Permissions.MANAGE_CHANNELS)
-
-    const channel = await this.channelsService.getChannel(id)
-    if (!channel) throw new NotFoundException({ code: ErrorCode.UnknownChannel })
 
     const { name, parentId, description } = data
     await this.channelsService.modifyChannel(id, { name, parentId, description })

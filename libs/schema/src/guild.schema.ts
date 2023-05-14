@@ -33,6 +33,7 @@ export interface Channel {
   type: 'voice' | 'text' | 'category'
   id: string
   name: string
+  position: number
   parentId?: string
   description?: string
 }

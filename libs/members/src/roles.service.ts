@@ -110,12 +110,21 @@ export class RolesService {
   }
 
   async canUpdateRolePositions(editorsHighestRole: number, positions: ({ id: string; position: number })[]) {
-    const pos = new Set<string>()
+    const totalRoles = await this.db.selectFrom('role')
+      .select(this.db.fn.countAll().as('total'))
+      .executeTakeFirstOrThrow()
+      .then(e => Number(e.total))
+    if (totalRoles !== positions.length) {
+      throw new BadRequestException({ code: ErrorCode.BadRolePositions })
+    }
+    const roleIds = new Set<string>()
+    const positionsTaken = new Set<number>()
     positions.forEach(c => {
-      if (pos.has(c.id)) {
-        throw new BadRequestException({ code: ErrorCode.SamePositionRoles })
+      if (c.position < 0 || roleIds.has(c.id) || positionsTaken.has(c.position)) {
+        throw new BadRequestException({ code: ErrorCode.BadRolePositions })
       } else {
-        pos.add(c.id)
+        positionsTaken.add(c.position)
+        roleIds.add(c.id)
       }
     })
     const asMap = new Map(positions.map(({ id, position }) => [ id, position ]))

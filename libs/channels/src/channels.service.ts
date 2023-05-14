@@ -1,12 +1,16 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { Channel } from '@app/schema/guild.schema'
 import { KyselyService } from '@app/kysely-adapter/kysely.service'
 import { ErrorCode } from '@app/response/error-code.enum'
 import { DB } from '@app/schema/db.schema'
+import { SnowflakeService } from '@app/snowflake/snowflake.service'
 
 @Injectable()
 export class ChannelsService {
-  constructor(private readonly db: KyselyService<DB>) {}
+  constructor(
+    private readonly db: KyselyService<DB>,
+    private readonly snowflake: SnowflakeService,
+  ) {}
 
   async getParent(id: string) {
     const ch = await this.getChannel(id)
@@ -59,15 +63,39 @@ export class ChannelsService {
       .execute()
   }
 
-  async createChannel(data: Channel) {
-    return await this.db
-      .insertInto('channel')
-      .values({ ...data })
+  async createChannel(data: Omit<Channel, 'id' | 'position'>) {
+    if (data.parentId) {
+      const parent = await this.getChannel(data.parentId)
+      if (data.type === 'category' || parent?.type !== 'category') {
+        throw new BadRequestException({ code: ErrorCode.InvalidChannelType })
+      }
+    }
+
+    const id = this.snowflake.nextStringId()
+    await this.db.updateTable('channel')
+      .set(({ bxp }) => ({
+        position: bxp('position', '+', 1),
+      }))
       .execute()
+
+    await this.db
+      .insertInto('channel')
+      .values({ ...data, id, position: 0 })
+      .execute()
+
+    return id
   }
 
   async modifyChannel(id: string, newData: { name: string; parentId?: string; description?: string }) {
     await this.enforceExists(id)
+    if (newData.parentId) {
+      const self = await this.getChannel(id)
+      const parent = await this.getChannel(newData.parentId)
+      if (self.type === 'category' || parent?.type !== 'category') {
+        throw new BadRequestException({ code: ErrorCode.InvalidChannelType })
+      }
+    }
+
     return await this.db
       .updateTable('channel')
       .where('channel.id', '=', id)
