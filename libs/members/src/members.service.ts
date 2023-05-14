@@ -27,6 +27,14 @@ export class MembersService {
     private readonly snowflakes: SnowflakeService,
   ) {}
 
+  async setIsBot(id: string, isBot: boolean) {
+    await this.enforceExists(id)
+    return this.db.updateTable('member')
+      .where('member.id', '=', id)
+      .set({ isBot })
+      .execute()
+  }
+
   async updateMember(id: string, username: string, avatar?: string) {
     await this.enforceExists(id)
     return this.db.updateTable('member')
@@ -68,6 +76,7 @@ export class MembersService {
       isOwner: total === 0,
       publicKey: exported,
       username: username,
+      isBot: false,
     }
     await this.db.insertInto('member')
       .values(member)

@@ -23,7 +23,6 @@ import { PermissionOverwritesService } from '@app/permissions/permission-overwri
 import { CreatePermissionOverwriteDto } from '../dto/create-permission-overwrite.dto'
 import { UpdatePermissionOverwriteDto } from '../dto/update-permission-overwrite.dto'
 
-
 @Controller('channels')
 @ApiTags('Channels')
 export class ChannelsController {
@@ -58,7 +57,7 @@ export class ChannelsController {
     @TokenData() tokenData: TokenPayload,
   ) {
     const authr = await this.auth.forUser(tokenData.userId)
-    await authr.hasPermission(Permissions.MANAGE_CHANNELS)
+    await authr.hasPermission(Permissions.MANAGE_CHANNELS, data.parentId)
 
     const id = this.snowflake.nextStringId()
     const { name, type, parentId, description } = data
@@ -133,7 +132,8 @@ export class ChannelsController {
 
     const { id: targetId, type, allow, deny } = data
     if ((allow & deny) !== 0) throw new BadRequestException({ code: ErrorCode.InvalidPermissions })
-    await this.permissionOverwrites.createPermissionOverwrite(id, type, targetId, allow, deny)
+    const idRes = await this.permissionOverwrites.createPermissionOverwrite(id, type, targetId, allow, deny)
+    return { id: idRes }
   }
 
   /** Modify permission overwrite on channel. Require MANAGE_CHANNELS permission. */
@@ -154,6 +154,7 @@ export class ChannelsController {
     const { allow, deny } = data
     if ((allow & deny) !== 0) throw new BadRequestException({ code: ErrorCode.InvalidPermissions })
     await this.permissionOverwrites.modifyPermissionOverwrite(targetId, allow, deny)
+    return true
   }
 
   /** Delete permission overwrite on channel. Require MANAGE_CHANNELS permission. */
@@ -175,7 +176,6 @@ export class ChannelsController {
 
   /** Get all permission overwrites on channel. */
   @Get(':id/permissions')
-  @RequireAuth()
   async getChannelPermissions(
     @Param('id') id: string,
   ) {
@@ -187,7 +187,6 @@ export class ChannelsController {
 
   /** Get a single permission overwrite on channel. */
   @Get(':id/permissions/:permissionOverwriteId')
-  @RequireAuth()
   async getChannelPermission(
     @Param('id') id: string,
     @Param('permissionOverwriteId') targetId: string,

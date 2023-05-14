@@ -19,6 +19,7 @@ export interface Member {
   isOwner: boolean
   avatar?: string
   username: string
+  isBot: boolean
 }
 
 // many-to-many relationships can only be done like this

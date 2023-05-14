@@ -112,6 +112,7 @@ export class PermissionOverwritesService {
       .insertInto('permissionOverwrite')
       .values(data)
       .execute()
+    return data.id
   }
 
   async modifyPermissionOverwrite(permissionOverwriteId: string, allow: number, deny: number) {

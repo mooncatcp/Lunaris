@@ -10,6 +10,7 @@ import { UpdateMemberDto } from '../dto/update-member.dto'
 import { RolesService } from '@app/members/roles.service'
 import { ApiTags } from '@nestjs/swagger'
 import { Permissions } from '@app/permissions/permissions.enum'
+import { SetIsBotDto } from '../dto/set-is-bot.dto'
 
 @Controller('members')
 @ApiTags('Members')
@@ -21,6 +22,20 @@ export class MembersController {
     private readonly roles: RolesService,
   ) {}
 
+  /** Switches the isBot flag on given member. */
+  @Patch(':member/isBot')
+  @RequireAuth()
+  async setIsBot(
+    @Param('member') member: string,
+    @TokenData() data: TokenPayload,
+    @Body() dto: SetIsBotDto,
+  ) {
+    await this.auth.forUser(data.userId).hasPermission(Permissions.ADD_BOTS)
+    await this.members.setIsBot(member, dto.isBot)
+    return true
+  }
+
+  /** Remove a role. */
   @Delete(':member/roles/:role')
   @RequireAuth()
   async removeRole(
@@ -37,6 +52,7 @@ export class MembersController {
     return true
   }
 
+  /** Add a role to a member. */
   @Post(':member/roles/:role')
   @RequireAuth()
   async addRole(
@@ -80,7 +96,8 @@ export class MembersController {
 
     return true
   }
-  
+
+  /** Register a new member. */
   @Post()
   async createMember(@Body() member: CreateMemberDto) {
     const id = await this.members.createMember(

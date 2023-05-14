@@ -17,6 +17,7 @@ export class RolesController {
     private readonly auth: AuthService,
   ) {}
 
+  /** Delete a role. */
   @Delete('id')
   @RequireAuth()
   async deleteRole(
@@ -32,6 +33,7 @@ export class RolesController {
     return true
   }
 
+  /** Modify a role. */
   @Patch(':id')
   @RequireAuth()
   async patchRole(
@@ -49,6 +51,7 @@ export class RolesController {
     return true
   }
 
+  /** Create a role. */
   @Post()
   @RequireAuth()
   async createRole(@TokenData() token: TokenPayload, @Body() dto: CreateRoleDto) {
@@ -59,6 +62,7 @@ export class RolesController {
     return { id }
   }
 
+  /** Get list of all roles. */
   @Get()
   async getRoles() {
     return this.roles.getRoles()

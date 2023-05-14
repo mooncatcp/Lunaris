@@ -10,7 +10,8 @@
         "name": "@nestjs/swagger",
         "options": {
           "dtoFileNameSuffix": [".dto.ts", ".schema.ts"],
-          "controllerFileNameSuffix": ".controller.ts"
+          "controllerFileNameSuffix": ".controller.ts",
+          "introspectComments": true
         }
       }
     ]

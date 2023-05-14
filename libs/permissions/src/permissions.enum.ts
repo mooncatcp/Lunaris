@@ -6,6 +6,7 @@ export enum Permissions {
   MANAGE_CHANNELS = 1 << 4,
   READ_MESSAGES = 1 << 5,
   SEND_MESSAGES = 1 << 6,
+  ADD_BOTS = 1 << 7,
 }
 
 export const channelPermissions = [
@@ -22,7 +23,8 @@ export const ALL = Permissions.MANAGE_ROLES |
   Permissions.MANAGE_MESSAGES |
   Permissions.MANAGE_CHANNELS |
   Permissions.READ_MESSAGES |
-  Permissions.SEND_MESSAGES
+  Permissions.SEND_MESSAGES |
+  Permissions.ADD_BOTS
 
 export const has = (check: number, permission: number) => {
   return (check & permission) === permission
