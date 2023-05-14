@@ -9,7 +9,10 @@
       {
         "name": "@nestjs/swagger",
         "options": {
-          "dtoFileNameSuffix": [".dto.ts", ".schema.ts"],
+          "dtoFileNameSuffix": [
+            ".dto.ts",
+            ".schema.ts"
+          ],
           "controllerFileNameSuffix": ".controller.ts",
           "introspectComments": true
         }
@@ -105,6 +108,15 @@
       "sourceRoot": "libs/snowflake/src",
       "compilerOptions": {
         "tsConfigPath": "libs/snowflake/tsconfig.lib.json"
+      }
+    },
+    "messages": {
+      "type": "library",
+      "root": "libs/messages",
+      "entryFile": "index",
+      "sourceRoot": "libs/messages/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/messages/tsconfig.lib.json"
       }
     }
   }

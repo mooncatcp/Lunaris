@@ -6,7 +6,6 @@ import { PermissionOverwrite } from '@app/schema/guild.schema'
 import { SnowflakeService } from '@app/snowflake/snowflake.service'
 import { ErrorCode } from '@app/response/error-code.enum'
 import { RolesService } from '@app/members/roles.service'
-import { ChannelsService } from '@app/channels/channels.service'
 
 @Injectable()
 export class PermissionOverwritesService {
@@ -14,7 +13,6 @@ export class PermissionOverwritesService {
     private readonly db: KyselyService<DB>,
     private readonly snowflakes: SnowflakeService,
     private readonly roles: RolesService,
-    private readonly channels: ChannelsService,
   ) {}
 
   async getResolvedPermissionOverwrites(member: string, channelId: string) {

@@ -113,7 +113,8 @@
       "^@app/channels(|/.*)$": "<rootDir>/libs/channels/src/$1",
       "^@app/permissions(|/.*)$": "<rootDir>/libs/permissions/src/$1",
       "^@app/snowflake(|/.*)$": "<rootDir>/libs/snowflake/src/$1",
-      "^@app/dev(|/.*)$": "<rootDir>/libs/dev/src/$1"
+      "^@app/dev(|/.*)$": "<rootDir>/libs/dev/src/$1",
+      "^@app/messages(|/.*)$": "<rootDir>/libs/messages/src/$1"
     }
   }
 }

@@ -13,6 +13,7 @@ export enum ErrorCode {
   InvalidPermissions,
   InvalidChannelType,
   CantMoveRole,
+  UnknownMessage,
   LoginAlreadyTaken = 20000,
   PublicKeyAlreadyRegistered,
   UnknownLogin = 30000,

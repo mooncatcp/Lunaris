@@ -85,6 +85,12 @@
       ],
       "@app/snowflake/*": [
         "libs/snowflake/src/*"
+      ],
+      "@app/messages": [
+        "libs/messages/src"
+      ],
+      "@app/messages/*": [
+        "libs/messages/src/*"
       ]
     }
   }
