@@ -9,7 +9,7 @@ export const createApp = async (log = true) => {
   const app =
     await NestFactory.create<NestFastifyApplication>(
       AppModule,
-      new FastifyAdapter(),
+      new FastifyAdapter({ ignoreTrailingSlash: true }),
       {
         logger: log ? [
           'error',

@@ -16,12 +16,15 @@ export class KyselyService<T> extends Kysely<T> implements OnModuleInit {
     super({
       dialect: dialectFactory.getDialect(),
       log: (event: LogEvent) => {
-        if (!this.config.debug) return
+        if (!this.config.debug && event.queryDurationMillis < 300) return
         if (event.level === 'query') {
           event = event as QueryLogEvent
           this.logger.verbose(`Query \`${event.query.sql}\` took ${event.queryDurationMillis}ms to execute`)
         } else if (event.level === 'error') {
           this.logger.error(`Query \`${event.query.sql}\` returned an error ${event.error}`)
+        }
+        if (event.queryDurationMillis >= 300) {
+          this.logger.error(`Query \`${event.query.sql}\` took ${event.queryDurationMillis}ms to execute.`)
         }
       },
     })
