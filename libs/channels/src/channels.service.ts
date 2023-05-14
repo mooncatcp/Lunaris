@@ -63,6 +63,40 @@ export class ChannelsService {
       .execute()
   }
 
+  async updateChannelPositions(positions: ({ id: string; position: number })[]) {
+    const totalChannels = await this.db.selectFrom('channel')
+      .select(this.db.fn.countAll().as('totalChannels'))
+      .executeTakeFirstOrThrow()
+      .then(e => Number(e.totalChannels))
+    if (positions.length !== totalChannels) {
+      throw new BadRequestException({ code: ErrorCode.BadChannelPositions })
+    }
+    const takenPositions = new Set<number>()
+    const ids = new Set<string>()
+    for (const position of positions) {
+      if (position.position < 0 || ids.has(position.id) || takenPositions.has(position.position)) {
+        throw new BadRequestException({ code: ErrorCode.BadChannelPositions })
+      } else {
+        await this.enforceExists(position.id)
+        takenPositions.add(position.position)
+        ids.add(position.id)
+      }
+    }
+
+    const proms = []
+
+    for (const position of positions) {
+      proms.push(
+        this.db.updateTable('channel')
+          .set({ position: position.position })
+          .where('id', '=', position.id)
+          .execute(),
+      )
+    }
+
+    return Promise.all(proms)
+  }
+
   async createChannel(data: Omit<Channel, 'id' | 'position'>) {
     if (data.parentId) {
       const parent = await this.getChannel(data.parentId)

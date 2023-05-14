@@ -6,6 +6,7 @@ export enum ErrorCode {
   Unauthorized,
   InvalidTokenFormat,
   BadRolePositions,
+  BadChannelPositions,
   InvalidSignature,
   NoTokenProvided,
   NoPermissions,
