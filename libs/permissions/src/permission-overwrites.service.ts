@@ -18,14 +18,13 @@ export class PermissionOverwritesService {
   ) {}
 
   async getResolvedPermissionOverwrites(member: string, channelId: string) {
-    const channel = await this.channels.getChannel(channelId)
     const basePermissions = await this.roles.calculateGuildPermissions(member)
     const roles = await this.roles.getUserRoles(member)
     const overwritesForRoles = await this.db.selectFrom('permissionOverwrite')
       .where(({ and, cmpr }) =>
         and([
           cmpr('roleId', 'in', roles),
-          cmpr('channelId', 'in', [ channel.parentId ?? '', channelId ]),
+          cmpr('channelId', '=', channelId),
         ]),
       )
       .selectAll()
@@ -35,7 +34,7 @@ export class PermissionOverwritesService {
       .where(({ and, cmpr }) =>
         and([
           cmpr('roleId', '=', everyoneRole.id),
-          cmpr('channelId', 'in', [ channel.parentId ?? '', channelId ]),
+          cmpr('channelId', '=', channelId),
         ]),
       )
       .selectAll()
@@ -61,7 +60,7 @@ export class PermissionOverwritesService {
       .where(({ and, cmpr }) =>
         and([
           cmpr('memberId', '=', member),
-          cmpr('channelId', 'in', [ channel.parentId ?? '', channelId ]),
+          cmpr('channelId', '=', channelId),
         ]),
       )
       .selectAll()
