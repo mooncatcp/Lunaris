@@ -74,14 +74,19 @@ export class PermissionOverwritesService {
     return permissions
   }
 
+  async getAllPermissionOverwrites() {
+    return await this.db
+      .selectFrom('permissionOverwrite')
+      .selectAll()
+      .execute() ?? []
+  }
+
   async getPermissionOverwrites(channelId: string) {
-    const overwrite = await this.db
+    return await this.db
       .selectFrom('permissionOverwrite')
       .where('channelId', '=', channelId)
       .selectAll()
       .execute() ?? []
-
-    return overwrite
   }
 
   async getPermissionOverwrite(permissionOverwriteId: string) {

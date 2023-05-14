@@ -45,7 +45,8 @@ export class Authorizer {
     }
   }
 
-  async hasPermission(perm: number) {
+  async hasPermission(perm: number, channelId?: string) {
+    if (channelId) await this.hasPermissionOnChannel(channelId, perm)
     const h = has(
       await this.roles.calculateGuildPermissions(this.user),
       perm,
@@ -56,7 +57,11 @@ export class Authorizer {
   }
 
   async hasPermissions(...perms: number[]) {
-    for (const perm of perms) await this.hasPermission(perm)
+    const h = perms.some(async (perm) => has(
+      await this.roles.calculateGuildPermissions(this.user),
+      perm,
+    ))
+    if (!h) throw new ForbiddenException({ code: ErrorCode.NoPermissions })
   }
 
   async hasPermissionOnChannel(channelId: string, perm: number) {

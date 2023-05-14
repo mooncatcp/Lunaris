@@ -58,13 +58,14 @@ export class ChannelsController {
     @TokenData() tokenData: TokenPayload,
   ) {
     const authr = await this.auth.forUser(tokenData.userId)
-    await authr.hasPermissions(Permissions.MANAGE_CHANNELS)
+    await authr.hasPermission(Permissions.MANAGE_CHANNELS)
 
     const id = this.snowflake.nextStringId()
     const { name, type, parentId, description } = data
     if (parentId) {
       const parent = await this.channelsService.getChannel(parentId)
-      if (!parent) throw new BadRequestException({ code: ErrorCode.UnknownChannel })
+      if (!parent)
+        throw new BadRequestException({ code: ErrorCode.UnknownChannel, details: [ 'Unknown parent channel' ] })
       if (parent.type !== 'category' || type === 'category')
         throw new BadRequestException({ code: ErrorCode.InvalidChannelType })
     }
@@ -89,7 +90,7 @@ export class ChannelsController {
     @Body() data: UpdateChannelDto,
   ) {
     const authr = await this.auth.forUser(tokenData.userId)
-    await authr.hasPermissions(Permissions.MANAGE_CHANNELS)
+    await authr.hasPermission(Permissions.MANAGE_CHANNELS)
 
     const channel = await this.channelsService.getChannel(id)
     if (!channel) throw new NotFoundException({ code: ErrorCode.UnknownChannel })
@@ -99,6 +100,7 @@ export class ChannelsController {
     return null
   }
 
+  /** Delete a channel. Require MANAGE_CHANNELS permission. */
   @Delete(':id')
   @RequireAuth()
   async deleteChannel(
@@ -106,7 +108,7 @@ export class ChannelsController {
     @TokenData() tokenData: TokenPayload,
   ) {
     const authr = await this.auth.forUser(tokenData.userId)
-    await authr.hasPermissions(Permissions.MANAGE_CHANNELS)
+    await authr.hasPermission(Permissions.MANAGE_CHANNELS)
 
     const channel = await this.channelsService.getChannel(id)
     if (!channel) throw new NotFoundException({ code: ErrorCode.UnknownChannel })
@@ -115,6 +117,7 @@ export class ChannelsController {
     return null
   }
 
+  /** Create permission overwrite on channel. Require MANAGE_CHANNELS permission.  */
   @Post(':id/permissions')
   @RequireAuth()
   async createChannelPermissions(
@@ -123,7 +126,7 @@ export class ChannelsController {
     @Body() data: CreatePermissionOverwriteDto,
   ) {
     const authr = await this.auth.forUser(tokenData.userId)
-    await authr.hasPermissions(Permissions.MANAGE_CHANNELS)
+    await authr.hasPermission(Permissions.MANAGE_CHANNELS)
 
     const channel = await this.channelsService.getChannel(id)
     if (!channel) throw new NotFoundException({ code: ErrorCode.UnknownChannel })
@@ -133,6 +136,7 @@ export class ChannelsController {
     await this.permissionOverwrites.createPermissionOverwrite(id, type, targetId, allow, deny)
   }
 
+  /** Modify permission overwrite on channel. Require MANAGE_CHANNELS permission. */
   @Patch(':id/permissions/:permissionOverwriteId')
   @RequireAuth()
   async modifyChannelPermissions(
@@ -142,7 +146,7 @@ export class ChannelsController {
     @Body() data: UpdatePermissionOverwriteDto,
   ) {
     const authr = await this.auth.forUser(tokenData.userId)
-    await authr.hasPermissions(Permissions.MANAGE_CHANNELS)
+    await authr.hasPermission(Permissions.MANAGE_CHANNELS)
 
     const channel = await this.channelsService.getChannel(id)
     if (!channel) throw new NotFoundException({ code: ErrorCode.UnknownChannel })
@@ -152,6 +156,7 @@ export class ChannelsController {
     await this.permissionOverwrites.modifyPermissionOverwrite(targetId, allow, deny)
   }
 
+  /** Delete permission overwrite on channel. Require MANAGE_CHANNELS permission. */
   @Delete(':id/permissions/:permissionOverwriteId')
   @RequireAuth()
   async deleteChannelPermissions(
@@ -160,7 +165,7 @@ export class ChannelsController {
     @TokenData() tokenData: TokenPayload,
   ) {
     const authr = await this.auth.forUser(tokenData.userId)
-    await authr.hasPermissions(Permissions.MANAGE_CHANNELS)
+    await authr.hasPermission(Permissions.MANAGE_CHANNELS)
 
     const channel = await this.channelsService.getChannel(id)
     if (!channel) throw new NotFoundException({ code: ErrorCode.UnknownChannel })
@@ -168,6 +173,7 @@ export class ChannelsController {
     await this.permissionOverwrites.deletePermissionOverwrite(targetId)
   }
 
+  /** Get all permission overwrites on channel. */
   @Get(':id/permissions')
   @RequireAuth()
   async getChannelPermissions(
@@ -179,6 +185,7 @@ export class ChannelsController {
     return await this.permissionOverwrites.getPermissionOverwrites(id)
   }
 
+  /** Get a single permission overwrite on channel. */
   @Get(':id/permissions/:permissionOverwriteId')
   @RequireAuth()
   async getChannelPermission(
@@ -191,18 +198,9 @@ export class ChannelsController {
     return await this.permissionOverwrites.getPermissionOverwrite(targetId)
   }
 
-  @Get(':id/test')
+  @Get('/permissions')
   @RequireAuth()
-  async test(
-    @Param('id') id: string,
-    @TokenData() tokenData: TokenPayload,
-  ) {
-    const authr = await this.auth.forUser(tokenData.userId)
-    await authr.hasPermissionOnChannel(id, Permissions.SEND_MESSAGES)
-
-    const channel = await this.channelsService.getChannel(id)
-    if (!channel) throw new NotFoundException({ code: ErrorCode.UnknownChannel })
-
-    return 'hui'
+  async getPermissions() {
+    return await this.permissionOverwrites.getAllPermissionOverwrites()
   }
 }
