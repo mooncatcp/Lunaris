@@ -8,12 +8,32 @@ import { DB } from '@app/schema/db.schema'
 export class ChannelsService {
   constructor(private readonly db: KyselyService<DB>) {}
 
+  async getParent(id: string) {
+    const ch = await this.getChannel(id)
+    if (ch === undefined) throw new NotFoundException({ code: ErrorCode.UnknownChannel })
+    try {
+      if (ch.parentId !== undefined) {
+        return this.getChannel(ch.parentId)
+      } else {
+        return undefined
+      }
+    } catch {
+      return undefined
+    }
+  }
+
   async getChannel(id: string) {
-    return await this.db
+    const ch = await this.db
       .selectFrom('channel')
       .where('channel.id', '=', id)
       .selectAll()
       .executeTakeFirst()
+
+    if (ch === undefined) {
+      throw new NotFoundException({ code: ErrorCode.UnknownChannel })
+    }
+
+    return ch
   }
 
   async exists(channel: string) {

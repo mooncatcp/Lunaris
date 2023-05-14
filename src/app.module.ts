@@ -15,6 +15,7 @@ import { KeystoreController } from './controllers/keystore.controller'
 import { AuthController } from './controllers/auth.controller'
 import { MembersController } from './controllers/members.controller'
 import { PermissionOverwritesModule } from '@app/permissions/permissions.module'
+import { RolesController } from './controllers/roles.controller'
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { PermissionOverwritesModule } from '@app/permissions/permissions.module'
     ChannelsController,
     AuthController,
     MembersController,
+    RolesController,
   ],
 })
 export class AppModule {}

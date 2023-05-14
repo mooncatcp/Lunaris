@@ -1,5 +1,3 @@
-import { Generated } from 'kysely'
-
 export interface Guild {
   name: string
   description?: string

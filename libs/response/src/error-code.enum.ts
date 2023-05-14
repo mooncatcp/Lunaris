@@ -19,4 +19,5 @@ export enum ErrorCode {
   UnknownRole,
   UnknownMember,
   UnknownAuthRequest,
+  UnknownPermissionOverwrite,
 }

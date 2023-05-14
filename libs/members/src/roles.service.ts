@@ -16,8 +16,33 @@ export class RolesService {
     private readonly snowflake: SnowflakeService,
   ) {}
 
+  async deleteRole(id: string) {
+    await this.db.deleteFrom('role')
+      .where('id', '=', id)
+      .execute()
+  }
+
+  async getRole(id: string) {
+    const role = await this.db.selectFrom('role')
+      .where('id', '=', id)
+      .selectAll()
+      .executeTakeFirst()
+    if (role === undefined) {
+      throw new NotFoundException({ code: ErrorCode.UnknownRole })
+    }
+
+    return role
+  }
+
+  async getRoles() {
+    return this.db.selectFrom('role')
+      .selectAll()
+      .execute()
+  }
+
   async getUserRoles(member: string) {
     await this.members.enforceExists(member)
+    const everyone = await this.getEveryoneRole()
     return this.db
       .selectFrom('roleMember')
       .where('roleMember.memberId', '=', member)
@@ -28,10 +53,12 @@ export class RolesService {
       .then(e =>
         e.filter(v => v !== null).map(e => e.roleId as string),
       )
+      .then(e => [ ...e, everyone.id ])
   }
 
   async canOnMember(executor: string, subject: string, permissionsRequired: number): Promise<boolean> {
     if (await this.members.isOwner(executor)) return true
+    if (executor === subject) return true
     const permissions = await this.calculateGuildPermissions(executor)
     if (!has(permissions, permissionsRequired)) {
       return false
@@ -43,6 +70,27 @@ export class RolesService {
     ])
 
     return executorH > subjectH
+  }
+
+  async ungrantRole(memberId: string, roleId: string) {
+    await this.members.enforceExists(memberId)
+    await this.enforceExists(roleId)
+
+    return this.db.deleteFrom('roleMember')
+      .where(({ and, cmpr }) => and([
+        cmpr('roleId', '=', roleId),
+        cmpr('memberId', '=', memberId),
+      ]))
+      .execute()
+  }
+
+  async grantRole(memberId: string, roleId: string) {
+    await this.members.enforceExists(memberId)
+    await this.enforceExists(roleId)
+
+    await this.db.insertInto('roleMember')
+      .values({ roleId, memberId })
+      .execute()
   }
 
   async exists(role: string) {
@@ -127,8 +175,8 @@ export class RolesService {
         position: 0,
       })
       .execute()
-    
-    return
+
+    return id
   }
 
   // todo: create role, create everyone role
@@ -176,13 +224,13 @@ export class RolesService {
     if (await this.members.isOwner(member)) {
       return ALL
     }
-    const permissions = await this.db
-      .selectFrom('roleMember')
-      .where('roleMember.memberId', '=', member)
-      .leftJoin('role', col => col.onRef('role.id', '=', 'roleMember.roleId'))
+    const roleIds = await this.getUserRoles(member)
+    const roles = await this.db.selectFrom('role')
+      .where('role.id', 'in', roleIds)
       .select('role.permissions')
       .execute()
-    return permissions
+
+    return roles
       .map(e => e.permissions ?? 0)
       .reduce((prev, cur) => merge(prev, cur), 0)
   }

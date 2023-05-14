@@ -1,6 +1,6 @@
 import { MembersService } from '@app/members/members.service'
 import { RolesService } from '@app/members/roles.service'
-import { has } from '@app/permissions/permissions.enum'
+import { has, Permissions } from '@app/permissions/permissions.enum'
 import { ForbiddenException } from '@nestjs/common'
 import { ErrorCode } from '@app/response/error-code.enum'
 import { PermissionOverwritesService } from '@app/permissions/permission-overwrites.service'
@@ -15,6 +15,20 @@ export class Authorizer {
 
   isMember(another: string) {
     if (another !== this.user) {
+      throw new ForbiddenException({ code: ErrorCode.NoPermissions })
+    }
+  }
+
+  async canOnRole(role: string) {
+    await this.hasPermission(Permissions.MANAGE_ROLES)
+    const member = await this.members.get(this.user)
+    if (member.isOwner) {
+      return
+    }
+    const role2 = await this.roles.getRole(role)
+    const highest = await this.roles.highestRole(this.user)
+
+    if (role2.position >= (highest.position ?? 0)) {
       throw new ForbiddenException({ code: ErrorCode.NoPermissions })
     }
   }

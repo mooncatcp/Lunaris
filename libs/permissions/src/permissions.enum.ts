@@ -6,13 +6,10 @@ export enum Permissions {
   MANAGE_CHANNELS = 1 << 4,
   READ_MESSAGES = 1 << 5,
   SEND_MESSAGES = 1 << 6,
-  MANAGE_CHANNEL = 1 << 7,
-  ADMINISTRATOR = 1 << 8,
 }
 
 export const channelPermissions = [
   Permissions.MANAGE_MESSAGES,
-  Permissions.MANAGE_CHANNEL,
   Permissions.READ_MESSAGES,
   Permissions.SEND_MESSAGES,
 ]
@@ -32,7 +29,7 @@ export const has = (check: number, permission: number) => {
 }
 
 export const merge = (one: number, two: number) =>
-  one & two
+  one | two
 
 export const remove = (from: number, which: number) =>
   from & (~which)

@@ -4,7 +4,6 @@ import { ErrorCode } from '@app/response/error-code.enum'
 import { FastifyReply } from 'fastify'
 import { instanceToPlain } from 'class-transformer'
 import WebSocket from 'ws'
-import { ValidationError } from 'class-validator'
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {

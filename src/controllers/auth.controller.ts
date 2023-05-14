@@ -16,7 +16,7 @@ export class AuthController {
   ) {}
 
   /** Get a token for user using their signature. */
-  @Post('token/:id')
+  @Post('token')
   async getToken(@Body() dto: GetTokenDto) {
     const signature = Buffer.from(dto.signature, 'base64')
     const publicKey = this.crypto.importPublicKey(Buffer.from(dto.publicKey, 'base64'))

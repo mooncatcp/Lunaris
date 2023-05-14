@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common'
 import { MembersService } from '@app/members/members.service'
 import { CryptoService } from '@app/crypto/crypto.service'
 import { AuthService } from '@app/auth/auth.service'
@@ -9,6 +9,7 @@ import { RequireAuth } from '@app/auth/auth.decorator'
 import { UpdateMemberDto } from '../dto/update-member.dto'
 import { RolesService } from '@app/members/roles.service'
 import { ApiTags } from '@nestjs/swagger'
+import { Permissions } from '@app/permissions/permissions.enum'
 
 @Controller('members')
 @ApiTags('Members')
@@ -19,6 +20,38 @@ export class MembersController {
     private readonly auth: AuthService,
     private readonly roles: RolesService,
   ) {}
+
+  @Delete(':member/roles/:role')
+  @RequireAuth()
+  async removeRole(
+    @Param('member') memberId: string,
+    @Param('role') roleId: string,
+    @TokenData() data: TokenPayload,
+  ) {
+    const authr = this.auth.forUser(data.userId)
+    await authr.onMember(memberId, Permissions.MANAGE_ROLES)
+    await authr.canOnRole(roleId)
+
+    await this.roles.ungrantRole(memberId, roleId)
+
+    return true
+  }
+
+  @Post(':member/roles/:role')
+  @RequireAuth()
+  async addRole(
+    @Param('member') memberId: string,
+    @Param('role') roleId: string,
+    @TokenData() data: TokenPayload,
+  ) {
+    const authr = this.auth.forUser(data.userId)
+    await authr.onMember(memberId, Permissions.MANAGE_ROLES)
+    await authr.canOnRole(roleId)
+
+    await this.roles.grantRole(memberId, roleId)
+
+    return true
+  }
 
   /** Get a member by id. */
   @Get(':id')

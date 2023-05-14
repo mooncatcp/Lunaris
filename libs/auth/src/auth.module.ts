@@ -21,10 +21,10 @@ import { PermissionOverwritesModule } from '@app/permissions/permissions.module'
   exports: [ AuthService, TokenService ],
   imports: [
     forwardRef(() => MembersModule),
+    forwardRef(() => PermissionOverwritesModule),
     MooncatConfigModule,
     CryptoModule,
     CacheModule.register(),
-    PermissionOverwritesModule,
   ],
 })
 export class AuthModule {}
