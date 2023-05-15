@@ -14,9 +14,4 @@ export class UpdateChannelDto {
   @IsString()
   @IsOptional()
   declare description?: string
-
-  /** Channel's position */
-  @IsNumber()
-  @IsOptional()
-  declare position?: number
 }
