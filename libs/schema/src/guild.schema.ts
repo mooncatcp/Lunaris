@@ -41,6 +41,8 @@ export interface Channel {
 export interface Message {
   id: string
   channelId: string
+  replyTo?: string
+  authorId: string
   content: string
   iv: string
   lastUpdatedAt?: Date

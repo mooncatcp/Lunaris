@@ -9,6 +9,7 @@ import { addEncryptionType00005 } from '@app/kysely-adapter/migrations/00005_add
 import { makePublicKeyUnique00006 } from '@app/kysely-adapter/migrations/00006_make_public_key_unique'
 import { addIsBot00007 } from '@app/kysely-adapter/migrations/00007_add_is_bot'
 import { addChannelPosition00008 } from '@app/kysely-adapter/migrations/00008_add_channel_position'
+import { addMessageAuthorAndReply00009 } from '@app/kysely-adapter/migrations/00009_add_message_author_and_reply'
 
 @Injectable()
 export class StaticMigrationProviderService implements MigrationProvider {
@@ -22,6 +23,7 @@ export class StaticMigrationProviderService implements MigrationProvider {
       '00006_make_public_key_unique': makePublicKeyUnique00006,
       '00007_add_is_bot': addIsBot00007,
       '00008_add_channel_position': addChannelPosition00008,
+      '00009_add_message_author_and_reply':addMessageAuthorAndReply00009,
     }
   }
 }

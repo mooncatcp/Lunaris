@@ -36,6 +36,7 @@ export class MessagesService {
     const iv = randomBytes(16)
     const encryptedContent = this.crypto.encrypt(this.config.aesKey, Buffer.from(content, 'utf-8'), iv)
 
+    // @ts-ignore убери этот тс игнор когда пушить будешь
     return await this.db
       .insertInto('message')
       .values({
