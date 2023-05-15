@@ -127,7 +127,7 @@ export class ChannelsService {
 
   async modifyChannel(
     id: string,
-    newData: { name: string; parentId?: string; description?: string; position?: number },
+    newData: { name: string; parentId?: string; description?: string; },
   ) {
     await this.enforceExists(id)
     if (newData.parentId) {
@@ -136,11 +136,6 @@ export class ChannelsService {
       if (self.type === 'category' || parent?.type !== 'category') {
         throw new BadRequestException({ code: ErrorCode.InvalidChannelType })
       }
-    }
-
-    if (newData.position) {
-      await this.updateChannelPositions([ { id, position: newData.position } ])
-      delete newData.position
     }
 
     return await this.db
