@@ -46,8 +46,6 @@ export class MessagesController {
     if (await this.channelsService.getChannelType(channel) !== 'text')
       throw new BadRequestException({ code: ErrorCode.InvalidChannelType, details: [ 'channel type not text' ] })
 
-    console.log(limit)
-
     return await this.messagesService.getMessages(limit ?? 100, before, after) ?? []
   }
 
