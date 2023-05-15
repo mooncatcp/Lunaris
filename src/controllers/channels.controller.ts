@@ -13,7 +13,6 @@ import { ErrorCode } from '@app/response/error-code.enum'
 import { CreateChannelDto } from '../dto/create-channel.dto'
 import { UpdateChannelDto } from '../dto/update-channel.dto'
 import { AuthService } from '@app/auth/auth.service'
-import { SnowflakeService } from '@app/snowflake/snowflake.service'
 import { ApiTags } from '@nestjs/swagger'
 import { RequireAuth } from '@app/auth/auth.decorator'
 import { TokenData } from '@app/auth/token.decorator'
@@ -29,7 +28,6 @@ export class ChannelsController {
   constructor(
     private readonly channelsService: ChannelsService,
     private readonly auth: AuthService,
-    private readonly snowflake: SnowflakeService,
     private readonly permissionOverwrites: PermissionOverwritesService,
   ) {}
 
@@ -82,8 +80,8 @@ export class ChannelsController {
     const authr = await this.auth.forUser(tokenData.userId)
     await authr.hasPermission(Permissions.MANAGE_CHANNELS)
 
-    const { name, parentId, description } = data
-    await this.channelsService.modifyChannel(id, { name, parentId, description })
+    const { name, parentId, description, position } = data
+    await this.channelsService.modifyChannel(id, { name, parentId, description, position })
     return null
   }
 

@@ -14,6 +14,8 @@ export enum ErrorCode {
   InvalidChannelType,
   CantMoveRole,
   UnknownMessage,
+  NotMessageAuthor,
+  TooManyMessages,
   LoginAlreadyTaken = 20000,
   PublicKeyAlreadyRegistered,
   UnknownLogin = 30000,

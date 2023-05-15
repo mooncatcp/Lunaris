@@ -1,4 +1,4 @@
-import { IsString } from 'class-validator'
+import { IsNumber, IsOptional, IsString } from 'class-validator'
 
 export class UpdateChannelDto {
   /** Channel name. */
@@ -7,9 +7,16 @@ export class UpdateChannelDto {
 
   /** Channel's parent. Must be a category. */
   @IsString()
+  @IsOptional()
   declare parentId?: string
 
   /** Channel's description, */
   @IsString()
+  @IsOptional()
   declare description?: string
+
+  /** Channel's position */
+  @IsNumber()
+  @IsOptional()
+  declare position?: number
 }

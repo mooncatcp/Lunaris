@@ -40,6 +40,11 @@ export class ChannelsService {
     return ch
   }
 
+  async getChannelType(id: string) {
+    const ch = await this.getChannel(id)
+    return ch.type
+  }
+
   async exists(channel: string) {
     const { countAll } = this.db.fn
     const res = await this.db
@@ -120,7 +125,10 @@ export class ChannelsService {
     return id
   }
 
-  async modifyChannel(id: string, newData: { name: string; parentId?: string; description?: string }) {
+  async modifyChannel(
+    id: string,
+    newData: { name: string; parentId?: string; description?: string; position?: number },
+  ) {
     await this.enforceExists(id)
     if (newData.parentId) {
       const self = await this.getChannel(id)
@@ -128,6 +136,11 @@ export class ChannelsService {
       if (self.type === 'category' || parent?.type !== 'category') {
         throw new BadRequestException({ code: ErrorCode.InvalidChannelType })
       }
+    }
+
+    if (newData.position) {
+      await this.updateChannelPositions([ { id, position: newData.position } ])
+      delete newData.position
     }
 
     return await this.db

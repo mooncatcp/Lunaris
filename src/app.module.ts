@@ -16,6 +16,8 @@ import { AuthController } from './controllers/auth.controller'
 import { MembersController } from './controllers/members.controller'
 import { PermissionOverwritesModule } from '@app/permissions/permissions.module'
 import { RolesController } from './controllers/roles.controller'
+import { MessagesController } from './controllers/messages.controller'
+import { MessagesModule } from '@app/messages/messages.module'
 
 @Module({
   imports: [
@@ -33,6 +35,7 @@ import { RolesController } from './controllers/roles.controller'
     ChannelsModule,
     SnowflakeModule,
     PermissionOverwritesModule,
+    MessagesModule,
   ],
   controllers: [
     KeystoreController,
@@ -40,6 +43,7 @@ import { RolesController } from './controllers/roles.controller'
     AuthController,
     MembersController,
     RolesController,
+    MessagesController,
   ],
 })
 export class AppModule {}
