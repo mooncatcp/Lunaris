@@ -16,8 +16,13 @@ import { AuthController } from './controllers/auth.controller'
 import { MembersController } from './controllers/members.controller'
 import { PermissionOverwritesModule } from '@app/permissions/permissions.module'
 import { RolesController } from './controllers/roles.controller'
+<<<<<<< HEAD
 import { MessagesController } from './controllers/messages.controller'
 import { MessagesModule } from '@app/messages/messages.module'
+=======
+import { RealtimeModule } from '@app/realtime/realtime.module'
+import { RealtimeGateway } from './controllers/realtime.gateway'
+>>>>>>> bf9a226 (Add basic websockets)
 
 @Module({
   imports: [
@@ -36,6 +41,7 @@ import { MessagesModule } from '@app/messages/messages.module'
     SnowflakeModule,
     PermissionOverwritesModule,
     MessagesModule,
+    RealtimeModule,
   ],
   controllers: [
     KeystoreController,
@@ -45,5 +51,6 @@ import { MessagesModule } from '@app/messages/messages.module'
     RolesController,
     MessagesController,
   ],
+  providers: [ RealtimeGateway ],
 })
 export class AppModule {}

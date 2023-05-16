@@ -114,7 +114,8 @@
       "^@app/permissions(|/.*)$": "<rootDir>/libs/permissions/src/$1",
       "^@app/snowflake(|/.*)$": "<rootDir>/libs/snowflake/src/$1",
       "^@app/dev(|/.*)$": "<rootDir>/libs/dev/src/$1",
-      "^@app/messages(|/.*)$": "<rootDir>/libs/messages/src/$1"
+      "^@app/messages(|/.*)$": "<rootDir>/libs/messages/src/$1",
+      "^@app/realtime(|/.*)$": "<rootDir>/libs/realtime/src/$1"
     }
   }
 }

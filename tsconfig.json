@@ -91,6 +91,12 @@
       ],
       "@app/messages/*": [
         "libs/messages/src/*"
+      ],
+      "@app/realtime": [
+        "libs/realtime/src"
+      ],
+      "@app/realtime/*": [
+        "libs/realtime/src/*"
       ]
     }
   }

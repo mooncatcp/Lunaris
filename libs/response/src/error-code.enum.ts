@@ -13,9 +13,9 @@ export enum ErrorCode {
   InvalidPermissions,
   InvalidChannelType,
   CantMoveRole,
-  UnknownMessage,
   NotMessageAuthor,
   TooManyMessages,
+  ClientAlreadyAuthorized,
   LoginAlreadyTaken = 20000,
   PublicKeyAlreadyRegistered,
   UnknownLogin = 30000,
@@ -24,4 +24,7 @@ export enum ErrorCode {
   UnknownMember,
   UnknownAuthRequest,
   UnknownPermissionOverwrite,
+  UnknownMessage,
+  InternalServerError = 40000,
+  UnknownClient,
 }

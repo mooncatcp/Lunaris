@@ -47,7 +47,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
       const wsHost = host.switchToWs()
       const socket = wsHost.getClient<WebSocket>()
 
-      socket.send(JSON.stringify(instanceToPlain(response)))
+      socket.send(JSON.stringify({
+        event: 'error',
+        data: response.errors,
+      }))
+      socket.close()
     }
   }
 }
