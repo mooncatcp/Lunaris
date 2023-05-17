@@ -95,9 +95,10 @@ export class MessagesService {
       .returningAll()
       .executeTakeFirst()
 
-    this.events.emit('message.created', msg)
+    const data = { ...(msg!), content }
+    this.events.emit('message.created', data)
 
-    return msg!
+    return data
   }
 
   async modifyMessage(messageId: string, authorId: string, content: string, attachments: string[] = []) {
@@ -118,10 +119,11 @@ export class MessagesService {
       .where('message.id', '=', messageId)
       .returningAll()
       .executeTakeFirst()
+    const r = { ...(result!), content }
 
-    this.events.emit('message.updated', result)
+    this.events.emit('message.updated', r)
 
-    return result!
+    return r
   }
 
   async deleteMessage(messageId: string) {
