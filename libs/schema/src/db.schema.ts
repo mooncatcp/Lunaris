@@ -24,5 +24,4 @@ export interface DB {
   channel: Channel
   message: Message
   permissionOverwrite: PermissionOverwrite
-  attachment: Attachment
 }

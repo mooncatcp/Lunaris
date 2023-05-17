@@ -9,7 +9,6 @@ import { MooncatConfigService } from '@app/config/config.service'
 import { ErrorCode } from '@app/response/error-code.enum'
 import { sql } from 'kysely'
 import { EventEmitter2 } from '@nestjs/event-emitter'
-import ms from 'ms'
 
 @Injectable() 
 export class MessagesService {
@@ -74,13 +73,6 @@ export class MessagesService {
     referenceId?: string,
   ) {
     const messageId = this.snowflakes.nextStringId()
-    if (attachments?.length) {
-      const attachmentsWithId = attachments.map(url => ({ url, id: this.snowflakes.nextStringId(), messageId }))
-      await this.db
-        .insertInto('attachment')
-        .values(attachmentsWithId)
-        .execute()
-    }
 
     if (referenceId) await this.enforceExists(referenceId)
 
@@ -98,6 +90,7 @@ export class MessagesService {
         authorId,
         encryptionType: 'aes',
         replyTo: referenceId,
+        attachments: attachments ?? [],
       })
       .returningAll()
       .executeTakeFirst()
@@ -107,7 +100,7 @@ export class MessagesService {
     return msg!
   }
 
-  async modifyMessage(messageId: string, authorId: string, content: string, attachments?: string[]) {
+  async modifyMessage(messageId: string, authorId: string, content: string, attachments: string[] = []) {
     const message = await this.db.selectFrom('message')
       .where('message.id', '=', messageId)
       .selectAll()
@@ -116,34 +109,12 @@ export class MessagesService {
     if (!message) throw new NotFoundException({ ErrorCode: ErrorCode.UnknownMessage })
     if (message.authorId !== authorId) throw new ForbiddenException({ ErrorCode: ErrorCode.NotMessageAuthor })
 
-    if (attachments?.length) {
-      const allAttachments = await this.db
-        .selectFrom('attachment')
-        .where('attachment.messageId', '=', messageId)
-        .selectAll()
-        .execute()
-
-      const attachmentsToDelete = allAttachments.filter(attachment => !attachments.includes(attachment.url))
-
-      if (attachmentsToDelete.length)
-        await this.db
-          .deleteFrom('attachment')
-          .where('attachment.id', 'in', attachmentsToDelete.map(attachment => attachment.id))
-          .execute()
-
-      const attachmentsWithId = attachments.map(url => ({ url, id: this.snowflakes.nextStringId(), messageId }))
-      await this.db
-        .insertInto('attachment')
-        .values(attachmentsWithId)
-        .execute()
-    }
-
     const iv = Buffer.from(message.iv, 'base64')
     const encryptedContent = this.crypto.encrypt(this.config.aesKey, Buffer.from(content, 'utf-8'), iv)
 
     const result = await this.db
       .updateTable('message')
-      .set({ content: encryptedContent.toString('base64') })
+      .set({ content: encryptedContent.toString('base64'), attachments })
       .where('message.id', '=', messageId)
       .returningAll()
       .executeTakeFirst()

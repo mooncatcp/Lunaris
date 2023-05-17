@@ -47,6 +47,7 @@ export interface Message {
   iv: string
   lastUpdatedAt?: Date
   flags: number
+  attachments: string[]
   encryptionType: 'e2ee' | 'aes'
 }
 

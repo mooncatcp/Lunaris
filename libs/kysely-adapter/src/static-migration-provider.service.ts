@@ -10,6 +10,7 @@ import { makePublicKeyUnique00006 } from '@app/kysely-adapter/migrations/00006_m
 import { addIsBot00007 } from '@app/kysely-adapter/migrations/00007_add_is_bot'
 import { addChannelPosition00008 } from '@app/kysely-adapter/migrations/00008_add_channel_position'
 import { addMessageAuthorAndReply00009 } from '@app/kysely-adapter/migrations/00009_add_message_author_and_reply'
+import { moveAttachmentsToArray00010 } from '@app/kysely-adapter/migrations/00010_move_attachments_to_array'
 
 @Injectable()
 export class StaticMigrationProviderService implements MigrationProvider {
@@ -24,6 +25,7 @@ export class StaticMigrationProviderService implements MigrationProvider {
       '00007_add_is_bot': addIsBot00007,
       '00008_add_channel_position': addChannelPosition00008,
       '00009_add_message_author_and_reply':addMessageAuthorAndReply00009,
+      '00010_move_attachments_to_array': moveAttachmentsToArray00010,
     }
   }
 }
