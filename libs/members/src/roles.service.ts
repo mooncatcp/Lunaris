@@ -1,25 +1,29 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
+import { BadRequestException, forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { Role } from '@app/schema/guild.schema'
 import { DB } from '@app/schema/db.schema'
 import { ALL, DEFAULT_GUILD_PERMISSIONS, has, merge } from '@app/permissions/permissions.enum'
 import { KyselyService } from '@app/kysely-adapter/kysely.service'
 import { MembersService } from '@app/members/members.service'
 import { ErrorCode } from '@app/response/error-code.enum'
-import { OnEvent } from '@nestjs/event-emitter'
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
 import { SnowflakeService } from '@app/snowflake/snowflake.service'
 
 @Injectable()
 export class RolesService {
   constructor(
     private readonly db: KyselyService<DB>,
-    private readonly members: MembersService,
+    @Inject(forwardRef(() => MembersService)) private readonly members: MembersService,
     private readonly snowflake: SnowflakeService,
+    private readonly events: EventEmitter2,
   ) {}
 
   async deleteRole(id: string) {
     await this.db.deleteFrom('role')
       .where('id', '=', id)
       .execute()
+    this.events.emit('role.deleted', { id })
+
+    return { id }
   }
 
   async getRole(id: string) {
@@ -63,7 +67,7 @@ export class RolesService {
     if (!has(permissions, permissionsRequired)) {
       return false
     }
-    
+
     const [ executorH, subjectH ] = await Promise.all([
       this.highestRole(executor).then(e => e.position!),
       this.highestRole(subject).then(e => e.position!),
@@ -76,12 +80,17 @@ export class RolesService {
     await this.members.enforceExists(memberId)
     await this.enforceExists(roleId)
 
-    return this.db.deleteFrom('roleMember')
+    await this.db.deleteFrom('roleMember')
       .where(({ and, cmpr }) => and([
         cmpr('roleId', '=', roleId),
         cmpr('memberId', '=', memberId),
       ]))
       .execute()
+    const roles = await this.getUserRoles(memberId)
+    const member = await this.members.get(memberId)
+    this.events.emit('member.updated', { ...member, roles })
+
+    return { ...member, roles }
   }
 
   async grantRole(memberId: string, roleId: string) {
@@ -91,6 +100,11 @@ export class RolesService {
     await this.db.insertInto('roleMember')
       .values({ roleId, memberId })
       .execute()
+    const roles = await this.getUserRoles(memberId)
+    const member = await this.members.get(memberId)
+    this.events.emit('member.updated', { ...member, roles })
+
+    return { ...member, roles }
   }
 
   async exists(role: string) {
@@ -157,6 +171,7 @@ export class RolesService {
         })
         .execute()
     }
+    this.events.emit('role.updated_positions', positions)
   }
 
   async updateRole(id: string, name: string, color: number, permissions: number) {
@@ -164,11 +179,20 @@ export class RolesService {
     return this.db.updateTable('role')
       .where('id', '=', id)
       .set({ name, color, permissions })
-      .execute()
+      .returningAll()
+      .executeTakeFirst()
+      .then(a => a!)
   }
 
   async createRole(name: string, idOverride?: string) {
     const id = idOverride ?? this.snowflake.nextStringId()
+    const role = {
+      id,
+      name,
+      color: 0xffffff,
+      permissions: DEFAULT_GUILD_PERMISSIONS,
+      position: 0,
+    }
 
     await this.db.updateTable('role')
       .set(({ bxp }) => ({
@@ -176,19 +200,12 @@ export class RolesService {
       }))
       .execute()
     await this.db.insertInto('role')
-      .values({
-        id,
-        name,
-        color: 0xffffff,
-        permissions: DEFAULT_GUILD_PERMISSIONS,
-        position: 0,
-      })
+      .values(role)
       .execute()
-
-    return id
+    this.events.emit('role.created', role)
+    return role
   }
 
-  // todo: create role, create everyone role
 
   @OnEvent('app.init')
   async createEveryoneRole() {
@@ -226,7 +243,7 @@ export class RolesService {
       .selectAll()
       .orderBy('role.position', 'desc')
       .executeTakeFirst()
-    return notEveryone ?? await this.getEveryoneRole()
+    return notEveryone! ?? await this.getEveryoneRole()
   }
 
   async calculateGuildPermissions(member: string) {

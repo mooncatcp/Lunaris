@@ -8,6 +8,8 @@ import { randomBytes } from 'node:crypto'
 import { MooncatConfigService } from '@app/config/config.service'
 import { ErrorCode } from '@app/response/error-code.enum'
 import { sql } from 'kysely'
+import { EventEmitter2 } from '@nestjs/event-emitter'
+import ms from 'ms'
 
 @Injectable() 
 export class MessagesService {
@@ -16,6 +18,7 @@ export class MessagesService {
     private readonly snowflakes: SnowflakeService,
     private readonly crypto: CryptoService,
     private readonly config: MooncatConfigService,
+    private readonly events: EventEmitter2,
   ) {}
 
   async exists(messageId: string) {
@@ -84,7 +87,7 @@ export class MessagesService {
     const iv = randomBytes(16)
     const encryptedContent = this.crypto.encrypt(this.config.aesKey, Buffer.from(content, 'utf-8'), iv)
 
-    return await this.db
+    const msg = await this.db
       .insertInto('message')
       .values({
         id: messageId,
@@ -96,8 +99,12 @@ export class MessagesService {
         encryptionType: 'aes',
         replyTo: referenceId,
       })
-      .returning('id')
-      .execute()
+      .returningAll()
+      .executeTakeFirst()
+
+    this.events.emit('message.created', msg)
+
+    return msg!
   }
 
   async modifyMessage(messageId: string, authorId: string, content: string, attachments?: string[]) {
@@ -134,11 +141,16 @@ export class MessagesService {
     const iv = Buffer.from(message.iv, 'base64')
     const encryptedContent = this.crypto.encrypt(this.config.aesKey, Buffer.from(content, 'utf-8'), iv)
 
-    await this.db
+    const result = await this.db
       .updateTable('message')
       .set({ content: encryptedContent.toString('base64') })
       .where('message.id', '=', messageId)
-      .execute()
+      .returningAll()
+      .executeTakeFirst()
+
+    this.events.emit('message.updated', result)
+
+    return result!
   }
 
   async deleteMessage(messageId: string) {
@@ -146,5 +158,6 @@ export class MessagesService {
       .deleteFrom('message')
       .where('message.id', '=', messageId)
       .execute()
+    this.events.emit('message.deleted', { id: messageId })
   }
 }

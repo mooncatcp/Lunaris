@@ -4,12 +4,14 @@ import { KyselyService } from '@app/kysely-adapter/kysely.service'
 import { ErrorCode } from '@app/response/error-code.enum'
 import { DB } from '@app/schema/db.schema'
 import { SnowflakeService } from '@app/snowflake/snowflake.service'
+import { EventEmitter2 } from '@nestjs/event-emitter'
 
 @Injectable()
 export class ChannelsService {
   constructor(
     private readonly db: KyselyService<DB>,
     private readonly snowflake: SnowflakeService,
+    private readonly events: EventEmitter2,
   ) {}
 
   async getParent(id: string) {
@@ -99,6 +101,8 @@ export class ChannelsService {
       )
     }
 
+    this.events.emit('channel.updated_positions', positions)
+
     return Promise.all(proms)
   }
 
@@ -122,12 +126,14 @@ export class ChannelsService {
       .values({ ...data, id, position: 0 })
       .execute()
 
-    return id
+    this.events.emit('channel.created', { ...data, id, position: 0 })
+
+    return { ...data, id, position: 0 }
   }
 
   async modifyChannel(
     id: string,
-    newData: { name: string; parentId?: string; description?: string; },
+    newData: { name: string; parentId?: string; description?: string },
   ) {
     await this.enforceExists(id)
     if (newData.parentId) {
@@ -138,18 +144,27 @@ export class ChannelsService {
       }
     }
 
-    return await this.db
+    const r = await this.db
       .updateTable('channel')
       .where('channel.id', '=', id)
       .set({ ...newData })
-      .execute()
+      .returningAll()
+      .executeTakeFirst()
+
+    this.events.emit('channel.updated', r)
+
+    return r!
   }
 
   async deleteChannel(id: string) {
     await this.enforceExists(id)
-    return await this.db
+    await this.db
       .deleteFrom('channel')
       .where('channel.id', '=', id)
       .execute()
+
+    this.events.emit('channel.deleted', { id })
+
+    return { id }
   }
 }

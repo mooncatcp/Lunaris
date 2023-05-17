@@ -8,6 +8,7 @@ import { AuthService } from '@app/auth/auth.service'
 import { Permissions } from '@app/permissions/permissions.enum'
 import { ModifyRoleDto } from '../dto/modify-role.dto'
 import { CreateRoleDto } from '../dto/create-role.dto'
+import { ModifyPositionDto } from '../dto/modify-positions.dto'
 
 @Controller('roles')
 @ApiTags('Roles')
@@ -28,9 +29,24 @@ export class RolesController {
     await authr.hasPermission(Permissions.MANAGE_ROLES)
     await authr.canOnRole(roleId)
 
-    await this.roles.deleteRole(roleId)
+    return this.roles.deleteRole(roleId)
+  }
 
-    return true
+  /** Change positions of roles. */
+  @Patch('positions')
+  @RequireAuth()
+  async updateRolePositions(
+    @TokenData() token: TokenPayload,
+    @Body() dto: ModifyPositionDto,
+  ) {
+    const authr = this.auth.forUser(token.userId)
+    await authr.hasPermission(Permissions.MANAGE_ROLES)
+    await this.roles.updateRolePositions(
+      dto.positions,
+      await this.roles.highestRole(token.userId).then(e => e.position!),
+    )
+
+    return dto.positions
   }
 
   /** Modify a role. */
@@ -46,9 +62,7 @@ export class RolesController {
     await authr.hasPermission(dto.permissions)
     await authr.canOnRole(roleId)
 
-    await this.roles.updateRole(roleId, dto.name, dto.color, dto.permissions)
-
-    return true
+    return this.roles.updateRole(roleId, dto.name, dto.color, dto.permissions)
   }
 
   /** Create a role. */
@@ -58,8 +72,7 @@ export class RolesController {
     const authr = this.auth.forUser(token.userId)
     await authr.hasPermission(Permissions.MANAGE_ROLES)
 
-    const id = await this.roles.createRole(dto.name)
-    return { id }
+    return this.roles.createRole(dto.name)
   }
 
   /** Get list of all roles. */

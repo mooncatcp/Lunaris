@@ -1,7 +1,8 @@
 import {
   BadRequestException,
   Body,
-  Controller, Delete,
+  Controller,
+  Delete,
   Get,
   NotFoundException,
   Param,
@@ -21,28 +22,44 @@ import { Permissions } from '@app/permissions/permissions.enum'
 import { PermissionOverwritesService } from '@app/permissions/permission-overwrites.service'
 import { CreatePermissionOverwriteDto } from '../dto/create-permission-overwrite.dto'
 import { UpdatePermissionOverwriteDto } from '../dto/update-permission-overwrite.dto'
+import { ModifyPositionDto } from '../dto/modify-positions.dto'
 
 @Controller('channels')
 @ApiTags('Channels')
 export class ChannelsController {
   constructor(
-    private readonly channelsService: ChannelsService,
+    private readonly channels: ChannelsService,
     private readonly auth: AuthService,
     private readonly permissionOverwrites: PermissionOverwritesService,
   ) {}
+
+  /** Change positions of channels. */
+  @Patch('positions')
+  @RequireAuth()
+  async updateRolePositions(
+    @TokenData() token: TokenPayload,
+    @Body() dto: ModifyPositionDto,
+  ) {
+    const authr = this.auth.forUser(token.userId)
+    await authr.hasPermission(Permissions.MANAGE_CHANNELS)
+    await this.channels.updateChannelPositions(dto.positions)
+
+    return dto.positions
+  }
+
 
   /** Get all channels */
   @Get()
   @RequireAuth()
   async getAllChannels() {
-    return await this.channelsService.getAllChannels()
+    return await this.channels.getAllChannels()
   }
 
   /** Get a single channel */
   @Get(':id')
   @RequireAuth()
   async getChannel(@Param('id') id: string) {
-    const channel = await this.channelsService.getChannel(id)
+    const channel = await this.channels.getChannel(id)
     if (!channel) throw new NotFoundException({ code: ErrorCode.UnknownChannel })
     else return channel
   }
@@ -59,14 +76,12 @@ export class ChannelsController {
 
     const { name, type, parentId, description } = data
 
-    const id = await this.channelsService.createChannel({
+    return this.channels.createChannel({
       name,
       type,
       parentId,
       description,
     })
-
-    return { id }
   }
 
   /** Modify channel. Require MANAGE_CHANNELS permission. */
@@ -80,9 +95,8 @@ export class ChannelsController {
     const authr = await this.auth.forUser(tokenData.userId)
     await authr.hasPermission(Permissions.MANAGE_CHANNELS)
 
-    const { name, parentId, description, position } = data
-    await this.channelsService.modifyChannel(id, { name, parentId, description, position })
-    return null
+    const { name, parentId, description } = data
+    return this.channels.modifyChannel(id, { name, parentId, description })
   }
 
   /** Delete a channel. Require MANAGE_CHANNELS permission. */
@@ -95,11 +109,10 @@ export class ChannelsController {
     const authr = await this.auth.forUser(tokenData.userId)
     await authr.hasPermission(Permissions.MANAGE_CHANNELS)
 
-    const channel = await this.channelsService.getChannel(id)
+    const channel = await this.channels.getChannel(id)
     if (!channel) throw new NotFoundException({ code: ErrorCode.UnknownChannel })
 
-    await this.channelsService.deleteChannel(id)
-    return null
+    return this.channels.deleteChannel(id)
   }
 
   /** Create permission overwrite on channel. Require MANAGE_CHANNELS permission.  */
@@ -113,13 +126,12 @@ export class ChannelsController {
     const authr = await this.auth.forUser(tokenData.userId)
     await authr.hasPermission(Permissions.MANAGE_CHANNELS)
 
-    const channel = await this.channelsService.getChannel(id)
+    const channel = await this.channels.getChannel(id)
     if (!channel) throw new NotFoundException({ code: ErrorCode.UnknownChannel })
 
     const { id: targetId, type, allow, deny } = data
     if ((allow & deny) !== 0) throw new BadRequestException({ code: ErrorCode.InvalidPermissions })
-    const idRes = await this.permissionOverwrites.createPermissionOverwrite(id, type, targetId, allow, deny)
-    return { id: idRes }
+    return this.permissionOverwrites.createPermissionOverwrite(id, type, targetId, allow, deny)
   }
 
   /** Modify permission overwrite on channel. Require MANAGE_CHANNELS permission. */
@@ -134,13 +146,12 @@ export class ChannelsController {
     const authr = await this.auth.forUser(tokenData.userId)
     await authr.hasPermission(Permissions.MANAGE_CHANNELS)
 
-    const channel = await this.channelsService.getChannel(id)
+    const channel = await this.channels.getChannel(id)
     if (!channel) throw new NotFoundException({ code: ErrorCode.UnknownChannel })
 
     const { allow, deny } = data
     if ((allow & deny) !== 0) throw new BadRequestException({ code: ErrorCode.InvalidPermissions })
-    await this.permissionOverwrites.modifyPermissionOverwrite(targetId, allow, deny)
-    return true
+    return this.permissionOverwrites.modifyPermissionOverwrite(targetId, allow, deny)
   }
 
   /** Delete permission overwrite on channel. Require MANAGE_CHANNELS permission. */
@@ -154,10 +165,10 @@ export class ChannelsController {
     const authr = await this.auth.forUser(tokenData.userId)
     await authr.hasPermission(Permissions.MANAGE_CHANNELS)
 
-    const channel = await this.channelsService.getChannel(id)
+    const channel = await this.channels.getChannel(id)
     if (!channel) throw new NotFoundException({ code: ErrorCode.UnknownChannel })
 
-    await this.permissionOverwrites.deletePermissionOverwrite(targetId)
+    return this.permissionOverwrites.deletePermissionOverwrite(targetId)
   }
 
   /** Get all permission overwrites on channel. */
@@ -165,10 +176,10 @@ export class ChannelsController {
   async getChannelPermissions(
     @Param('id') id: string,
   ) {
-    const channel = await this.channelsService.getChannel(id)
+    const channel = await this.channels.getChannel(id)
     if (!channel) throw new NotFoundException({ code: ErrorCode.UnknownChannel })
 
-    return await this.permissionOverwrites.getPermissionOverwrites(id)
+    return this.permissionOverwrites.getPermissionOverwrites(id)
   }
 
   /** Get a single permission overwrite on channel. */
@@ -177,7 +188,7 @@ export class ChannelsController {
     @Param('id') id: string,
     @Param('permissionOverwriteId') targetId: string,
   ) {
-    const channel = await this.channelsService.getChannel(id)
+    const channel = await this.channels.getChannel(id)
     if (!channel) throw new NotFoundException({ code: ErrorCode.UnknownChannel })
 
     return await this.permissionOverwrites.getPermissionOverwrite(targetId)

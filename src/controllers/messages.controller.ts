@@ -46,7 +46,7 @@ export class MessagesController {
     if (await this.channelsService.getChannelType(channel) !== 'text')
       throw new BadRequestException({ code: ErrorCode.InvalidChannelType, details: [ 'channel type not text' ] })
 
-    return await this.messagesService.getMessages(limit ?? 100, before, after) ?? []
+    return this.messagesService.getMessages(limit ?? 100, before, after) ?? []
   }
 
   @Get(':id')
@@ -62,7 +62,7 @@ export class MessagesController {
     if (await this.channelsService.getChannelType(channel) !== 'text')
       throw new BadRequestException({ code: ErrorCode.InvalidChannelType, details: [ 'channel type not text' ] })
 
-    return await this.messagesService.getMessage(id)
+    return this.messagesService.getMessage(id)
   }
 
   @Post()
@@ -80,7 +80,7 @@ export class MessagesController {
 
     const { content, flags, referenceMessageId, attachments } = data
 
-    return await this.messagesService.createMessage(
+    return this.messagesService.createMessage(
       channel, content, flags,
       tokenData.userId, attachments, referenceMessageId,
     )
@@ -96,8 +96,7 @@ export class MessagesController {
   ) {
     const { content, attachments } = data
 
-    await this.messagesService.modifyMessage(id, tokenData.userId, content, attachments)
-    return true
+    return this.messagesService.modifyMessage(id, tokenData.userId, content, attachments)
   }
 
   @Delete(':id')
@@ -117,6 +116,6 @@ export class MessagesController {
     if (message.authorId !== tokenData.userId) await authr.hasPermission(Permissions.MANAGE_MESSAGES, channel)
 
     await this.messagesService.deleteMessage(id)
-    return true
+    return { id }
   }
 }

@@ -15,7 +15,7 @@ import { CryptoService } from '@app/crypto/crypto.service'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { Member } from '@app/schema/guild.schema'
 import { SnowflakeService } from '@app/snowflake/snowflake.service'
-
+import { RolesService } from '@app/members/roles.service'
 
 @Injectable()
 export class MembersService {
@@ -23,24 +23,36 @@ export class MembersService {
     private readonly db: KyselyService<DB>,
     private readonly crypto: CryptoService,
     @Inject(forwardRef(() => TokenService)) private readonly tokens: TokenService,
-    private readonly emitter: EventEmitter2,
+    private readonly events: EventEmitter2,
     private readonly snowflakes: SnowflakeService,
+    @Inject(forwardRef(() => RolesService)) private readonly roles: RolesService,
   ) {}
 
   async setIsBot(id: string, isBot: boolean) {
     await this.enforceExists(id)
-    return this.db.updateTable('member')
+    const member = await this.db.updateTable('member')
       .where('member.id', '=', id)
       .set({ isBot })
-      .execute()
+      .returningAll()
+      .executeTakeFirst()
+    const roles = await this.roles.getUserRoles(id)
+    this.events.emit('member.updated', { ...member, roles })
+
+    return member!
   }
 
   async updateMember(id: string, username: string, avatar?: string) {
     await this.enforceExists(id)
-    return this.db.updateTable('member')
+    const member = (await this.db.updateTable('member')
       .where('member.id', '=', id)
       .set({ username, avatar })
-      .execute()
+      .returningAll()
+      .executeTakeFirst())!
+    const roles = await this.roles.getUserRoles(id)
+
+    this.events.emit('member.updated', { ...member, roles })
+
+    return { ...member, roles }
   }
 
   async get(id: string) {
@@ -83,10 +95,12 @@ export class MembersService {
       .execute()
 
     if (total === 0) {
-      await this.emitter.emitAsync('app.init')
+      await this.events.emitAsync('app.init')
     }
+    const roles = await this.roles.getUserRoles(member.id)
+    this.events.emit('member.created', { ...member, roles })
 
-    return member.id
+    return { ...member, roles }
   }
 
   async getOwner() {

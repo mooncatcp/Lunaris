@@ -6,6 +6,7 @@ import { PermissionOverwrite } from '@app/schema/guild.schema'
 import { SnowflakeService } from '@app/snowflake/snowflake.service'
 import { ErrorCode } from '@app/response/error-code.enum'
 import { RolesService } from '@app/members/roles.service'
+import { EventEmitter2 } from '@nestjs/event-emitter'
 
 @Injectable()
 export class PermissionOverwritesService {
@@ -13,6 +14,7 @@ export class PermissionOverwritesService {
     private readonly db: KyselyService<DB>,
     private readonly snowflakes: SnowflakeService,
     private readonly roles: RolesService,
+    private readonly events: EventEmitter2,
   ) {}
 
   async getResolvedPermissionOverwrites(member: string, channelId: string) {
@@ -105,23 +107,34 @@ export class PermissionOverwritesService {
     if (!(checkValid(allow, channelPermissions) && checkValid(deny, channelPermissions)))
       throw new BadRequestException({ code: ErrorCode.InvalidPermissions })
 
-    await this.db
+    const overwrite = await this.db
       .insertInto('permissionOverwrite')
       .values(data)
-      .execute()
-    return data.id
+      .returningAll()
+      .executeTakeFirst()
+
+    this.events.emit('permission_overwrite.created', overwrite)
+
+    return overwrite!
   }
 
   async modifyPermissionOverwrite(permissionOverwriteId: string, allow: number, deny: number) {
-
     if (!(checkValid(allow, channelPermissions) && checkValid(deny, channelPermissions)))
       throw new BadRequestException({ code: ErrorCode.InvalidPermissions })
 
-    await this.db
+    if ((allow & deny) !== 0)
+      throw new BadRequestException({ code: ErrorCode.InvalidPermissions })
+
+    const data = await this.db
       .updateTable('permissionOverwrite')
       .where('id', '=', permissionOverwriteId)
       .set({ allow, deny })
-      .execute()
+      .returningAll()
+      .executeTakeFirst()
+
+    this.events.emit('permission_overwrite.updated', data)
+
+    return data!
   }
 
   async deletePermissionOverwrite(permissionOverwriteId: string) {
@@ -129,5 +142,8 @@ export class PermissionOverwritesService {
       .deleteFrom('permissionOverwrite')
       .where('id', '=', permissionOverwriteId)
       .execute()
+    this.events.emit('permission_overwrite.deleted', { id: permissionOverwriteId })
+
+    return { id: permissionOverwriteId }
   }
 }

@@ -31,8 +31,7 @@ export class MembersController {
     @Body() dto: SetIsBotDto,
   ) {
     await this.auth.forUser(data.userId).hasPermission(Permissions.ADD_BOTS)
-    await this.members.setIsBot(member, dto.isBot)
-    return true
+    return this.members.setIsBot(member, dto.isBot)
   }
 
   /** Remove a role. */
@@ -47,9 +46,7 @@ export class MembersController {
     await authr.onMember(memberId, Permissions.MANAGE_ROLES)
     await authr.canOnRole(roleId)
 
-    await this.roles.ungrantRole(memberId, roleId)
-
-    return true
+    return this.roles.ungrantRole(memberId, roleId)
   }
 
   /** Add a role to a member. */
@@ -64,9 +61,7 @@ export class MembersController {
     await authr.onMember(memberId, Permissions.MANAGE_ROLES)
     await authr.canOnRole(roleId)
 
-    await this.roles.grantRole(memberId, roleId)
-
-    return true
+    return this.roles.grantRole(memberId, roleId)
   }
 
   /** Get a member by id. */
@@ -92,21 +87,17 @@ export class MembersController {
     const authr = this.auth.forUser(tokenData.userId)
     authr.isMember(userId)
 
-    await this.members.updateMember(userId, dto.username, dto.avatar)
-
-    return true
+    return this.members.updateMember(userId, dto.username, dto.avatar)
   }
 
   /** Register a new member. */
   @Post()
   async createMember(@Body() member: CreateMemberDto) {
-    const id = await this.members.createMember(
+    return this.members.createMember(
       this.crypto.importPublicKey(Buffer.from(member.publicKey, 'base64')),
       member.username,
       member.authRequestId,
       Buffer.from(member.signature, 'base64'),
     )
-
-    return { id }
   }
 }
