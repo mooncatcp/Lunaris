@@ -1,13 +1,14 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { KyselyService } from '@app/kysely-adapter/kysely.service'
 import { DB } from '@app/schema/db.schema'
-import { channelPermissions, checkValid, has, Permissions } from '@app/permissions/permissions.enum'
+import { channelPermissions, checkValid, Permissions } from '@app/permissions/permissions.enum'
 import { PermissionOverwrite } from '@app/schema/guild.schema'
 import { SnowflakeService } from '@app/snowflake/snowflake.service'
 import { ErrorCode } from '@app/response/error-code.enum'
 import { RolesService } from '@app/members/roles.service'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { MembersService } from '@app/members/members.service'
+import { ChannelsService } from '@app/channels/channels.service'
 
 @Injectable()
 export class PermissionOverwritesService {
@@ -17,12 +18,11 @@ export class PermissionOverwritesService {
     private readonly roles: RolesService,
     private readonly events: EventEmitter2,
     private readonly members: MembersService,
+    private readonly channels: ChannelsService,
   ) {}
 
-  async getResolvedPermissionOverwrites(member: string, channelId: string) {
-    const basePermissions = await this.roles.calculateGuildPermissions(member)
-    const roles = await this.roles.getUserRoles(member)
-    const overwritesForRoles = await this.db.selectFrom('permissionOverwrite')
+  async getOverwritesForRolesAndChannel(roles: string[], channelId: string) {
+    return this.db.selectFrom('permissionOverwrite')
       .where(({ and, cmpr }) =>
         and([
           cmpr('roleId', 'in', roles),
@@ -31,6 +31,29 @@ export class PermissionOverwritesService {
       )
       .selectAll()
       .execute()
+  }
+
+  async getOverwriteForMemberAndChannel(member: string, channelId: string) {
+    return this.db.selectFrom('permissionOverwrite')
+      .where(({ and, cmpr }) =>
+        and([
+          cmpr('memberId', '=', member),
+          cmpr('channelId', '=', channelId),
+        ]),
+      )
+      .selectAll()
+      .executeTakeFirst()
+  }
+
+
+  async getResolvedPermissionOverwrites(member: string, channelId: string) {
+    const basePermissions = await this.roles.calculateGuildPermissions(member)
+    const channel = await this.channels.getChannel(channelId)
+    const roles = await this.roles.getUserRoles(member)
+    let overwritesForRoles = await this.getOverwritesForRolesAndChannel(roles, channelId)
+    if (overwritesForRoles.length === 0 && channel.parentId) {
+      overwritesForRoles = await this.getOverwritesForRolesAndChannel(roles, channelId)
+    }
 
     let permissions = basePermissions
     let allow = 0
@@ -44,15 +67,10 @@ export class PermissionOverwritesService {
     permissions &= ~deny
     permissions |= allow
 
-    const memberOverwrite = await this.db.selectFrom('permissionOverwrite')
-      .where(({ and, cmpr }) =>
-        and([
-          cmpr('memberId', '=', member),
-          cmpr('channelId', '=', channelId),
-        ]),
-      )
-      .selectAll()
-      .executeTakeFirst()
+    let memberOverwrite = await this.getOverwriteForMemberAndChannel(member, channelId)
+    if (memberOverwrite === undefined && channel.parentId !== undefined) {
+      memberOverwrite = await this.getOverwriteForMemberAndChannel(member, channel.parentId)
+    }
     if (memberOverwrite !== undefined) {
       permissions |= memberOverwrite.allow
       permissions &= ~memberOverwrite.deny
