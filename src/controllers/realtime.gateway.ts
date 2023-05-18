@@ -33,7 +33,7 @@ export class RealtimeGateway implements OnGatewayConnection<WebSocket> {
     @MessageBody() body: AuthWsDto,
     @ConnectedSocket() socket: Socket,
   ) {
-    await this.realtime.authorizeClient(socket.id, body.token)
+    await this.realtime.authorizeClient(socket.id, body.token, body.interestedIn)
 
     return { event: 'hello', data: { id: socket.id } }
   }

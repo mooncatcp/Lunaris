@@ -34,7 +34,9 @@ import { RealtimeGateway } from './controllers/realtime.gateway'
     ConfigModule.forRoot({
       envFilePath: [ './.mooncatrc' ],
     }),
-    EventEmitterModule.forRoot(),
+    EventEmitterModule.forRoot({
+      wildcard: true,
+    }),
     MooncatConfigModule,
     KyselyModule,
     ResponseModule,

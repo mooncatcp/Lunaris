@@ -7,6 +7,7 @@ import { SnowflakeService } from '@app/snowflake/snowflake.service'
 import { ErrorCode } from '@app/response/error-code.enum'
 import { RolesService } from '@app/members/roles.service'
 import { EventEmitter2 } from '@nestjs/event-emitter'
+import { MembersService } from '@app/members/members.service'
 
 @Injectable()
 export class PermissionOverwritesService {
@@ -15,6 +16,7 @@ export class PermissionOverwritesService {
     private readonly snowflakes: SnowflakeService,
     private readonly roles: RolesService,
     private readonly events: EventEmitter2,
+    private readonly members: MembersService,
   ) {}
 
   async getResolvedPermissionOverwrites(member: string, channelId: string) {
@@ -29,20 +31,6 @@ export class PermissionOverwritesService {
       )
       .selectAll()
       .execute()
-    const everyoneRole = await this.roles.getEveryoneRole()
-    const everyoneOverwrite = await this.db.selectFrom('permissionOverwrite')
-      .where(({ and, cmpr }) =>
-        and([
-          cmpr('roleId', '=', everyoneRole.id),
-          cmpr('channelId', '=', channelId),
-        ]),
-      )
-      .selectAll()
-      .executeTakeFirst()
-
-    if (everyoneOverwrite !== undefined) {
-      overwritesForRoles.push(everyoneOverwrite)
-    }
 
     let permissions = basePermissions
     let allow = 0
@@ -127,34 +115,19 @@ export class PermissionOverwritesService {
   }
 
   async getAvailableChannels(member: string) {
-    const channels: Map<string, any> = new Map()
-
-    const basePermissions = await this.roles.calculateGuildPermissions(member)
-    const roles = await this.roles.getUserRoles(member)
-    const memberOverwrites = await this.getPermissionOverwritesForRoleOrMember(member)
-    const rolesOverwrites = await this.getPermissionOverwritesForRoles(roles)
-    const allChannels = await this.db
+    const channels = await this.db
       .selectFrom('channel')
       .selectAll()
       .execute()
-
-    for (const overwrite of memberOverwrites) {
-      const channel = allChannels.find(c => c.id === overwrite.channelId)
-      if (!channel) continue
-
-      const permissions = basePermissions & ~overwrite.deny | overwrite.allow
-      if (has(Permissions.READ_MESSAGES, permissions) && !channels.has(channel.id)) channels.set(channel.id, channel)
+    const proms = []
+    
+    for (const channel of channels) {
+      const promise = this.getResolvedPermissionOverwrites(member, channel.id)  
+        .then(v => (v & Permissions.READ_MESSAGES) === Permissions.READ_MESSAGES ? channel.id : '' )
+      proms.push(promise)
     }
 
-    for (const overwrite of rolesOverwrites) {
-      const channel = allChannels.find(c => c.id === overwrite.channelId)
-      if (!channel) continue
-
-      const permissions = basePermissions & ~overwrite.deny | overwrite.allow
-      if (has(Permissions.READ_MESSAGES, permissions) && !channels.has(channel.id)) channels.set(channel.id, channel)
-    }
-
-    return channels
+    return Promise.all(proms).then(e => e.filter(e => e !== ''))
   }
 
   async createPermissionOverwrite(channelId: string, type: 'role' | 'member', id: string, allow: number, deny: number) {

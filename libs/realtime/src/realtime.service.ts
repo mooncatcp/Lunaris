@@ -26,7 +26,9 @@ export class RealtimeService implements OnModuleInit {
     private readonly config: MooncatConfigService,
     private readonly permissions: PermissionOverwritesService,
     private readonly roles: RolesService,
-  ) {}
+  ) {
+    this.events.onAny(this.handleEvents)
+  }
 
   async onModuleInit() {
     if (this.config.debug) {
@@ -36,7 +38,7 @@ export class RealtimeService implements OnModuleInit {
     }
   }
 
-  async authorizeClient(id: string, token: string) {
+  async authorizeClient(id: string, token: string, interestedIn: string[]) {
     const connection = this.connections.get(id)
     if (connection === undefined)
       throw new InternalServerErrorException({ code: ErrorCode.UnknownClient })
@@ -44,29 +46,55 @@ export class RealtimeService implements OnModuleInit {
     if (connection.userId) {
       throw new BadRequestException({ code: ErrorCode.ClientAlreadyAuthorized })
     } else {
-      // TODO: УБЕРЕШЬ ЭТО КОГДА ЗАЮЗАЕШЬ ПЕРЕМЕННУЮ
-      // eslint-disable-next-line
-      const availableChannels = await this.permissions.getAvailableChannels(data.userId)
-
       this.events.emit('socket.auth', this.connections.get(id)!)
       connection.userId = data.userId
+      connection.interestedIn = interestedIn
+      connection.channels = await this.permissions.getAvailableChannels(data.userId)
     }
   }
 
-  @OnEvent('permission_overwrite.updated')
+  async handleEvents(_event: string | string[], payload: any) {
+    let event = _event as string
+    if (Array.isArray(event)) {
+      event = event.join('.')
+    }
+    const audience: Socket[] = []
+
+    if (event.startsWith('app')) return
+    else if (event.startsWith('message') && event !== 'message.deleted') {
+      const data = payload as { channelId: string }
+      for (const client of this.connections.values()) {
+        if (client.interestedIn.includes(event) && client.channels.includes(data.channelId)) {
+          audience.push(client)
+        }
+      }
+    } else {
+      for (const client of this.connections.values()) {
+        if (client.interestedIn.includes(event)) {
+          audience.push(client)
+        }
+      }
+    }
+
+    for (const client of audience) {
+      client.send(JSON.stringify({
+        event,
+        data: payload,
+      }))
+    }
+  }
+
+  @OnEvent('permission_overwrite.updated', { async: true })
   async onPermissionOverwriteUpdated(payload: PermissionOverwrite) {
     const connections = [ ...this.connections.values() ]
     for (const connection of connections) {
       if (!connection.userId) continue
       const memberRoles = await this.roles.getUserRoles(connection.userId!)
-      if (payload.roleId && memberRoles.includes(payload.roleId)) {
-        // TODO: УБЕРЕШЬ ЭТО КОГДА ЗАЮЗАЕШЬ ПЕРЕМЕННУЮ
-        // eslint-disable-next-line
-        const availableChannels = await this.permissions.getAvailableChannels(connection.userId!)
-      } else if (payload.memberId === connection.userId) {
-        // TODO: УБЕРЕШЬ ЭТО КОГДА ЗАЮЗАЕШЬ ПЕРЕМЕННУЮ
-        // eslint-disable-next-line
-        const availableChannels = await this.permissions.getAvailableChannels(connection.userId!)
+      if (
+        (payload.roleId && memberRoles.includes(payload.roleId)) ||
+        (payload.memberId && payload.memberId === connection.userId)
+      ) {
+        connection.channels = await this.permissions.getAvailableChannels(connection.userId!)
       }
     }
   }
@@ -75,6 +103,8 @@ export class RealtimeService implements OnModuleInit {
     const connectionId = this.snowflake.nextStringId()
     client.id = connectionId
     client.userId = null
+    client.channels = []
+    client.interestedIn = []
     this.connections.set(connectionId, client)
 
     client.onclose = () => {
