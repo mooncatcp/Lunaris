@@ -5,8 +5,11 @@ import { SnowflakeService } from '@app/snowflake/snowflake.service'
 import { Socket } from './websocket.type'
 import { TokenService } from '@app/auth/token.service'
 import { ErrorCode } from '@app/response/error-code.enum'
-import { EventEmitter2 } from '@nestjs/event-emitter'
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
 import { MooncatConfigService } from '@app/config/config.service'
+import { PermissionOverwritesService } from '@app/permissions/permission-overwrites.service'
+import { PermissionOverwrite } from '@app/schema/guild.schema'
+import { RolesService } from '@app/members/roles.service'
 
 @Injectable()
 export class RealtimeService implements OnModuleInit {
@@ -21,6 +24,8 @@ export class RealtimeService implements OnModuleInit {
     private readonly token: TokenService,
     private readonly events: EventEmitter2,
     private readonly config: MooncatConfigService,
+    private readonly permissions: PermissionOverwritesService,
+    private readonly roles: RolesService,
   ) {}
 
   async onModuleInit() {
@@ -39,8 +44,30 @@ export class RealtimeService implements OnModuleInit {
     if (connection.userId) {
       throw new BadRequestException({ code: ErrorCode.ClientAlreadyAuthorized })
     } else {
+      // TODO: УБЕРЕШЬ ЭТО КОГДА ЗАЮЗАЕШЬ ПЕРЕМЕННУЮ
+      // eslint-disable-next-line
+      const availableChannels = await this.permissions.getAvailableChannels(data.userId)
+
       this.events.emit('socket.auth', this.connections.get(id)!)
       connection.userId = data.userId
+    }
+  }
+
+  @OnEvent('permission_overwrite.updated')
+  async onPermissionOverwriteUpdated(payload: PermissionOverwrite) {
+    const connections = [ ...this.connections.values() ]
+    for (const connection of connections) {
+      if (!connection.userId) continue
+      const memberRoles = await this.roles.getUserRoles(connection.userId!)
+      if (payload.roleId && memberRoles.includes(payload.roleId)) {
+        // TODO: УБЕРЕШЬ ЭТО КОГДА ЗАЮЗАЕШЬ ПЕРЕМЕННУЮ
+        // eslint-disable-next-line
+        const availableChannels = await this.permissions.getAvailableChannels(connection.userId!)
+      } else if (payload.memberId === connection.userId) {
+        // TODO: УБЕРЕШЬ ЭТО КОГДА ЗАЮЗАЕШЬ ПЕРЕМЕННУЮ
+        // eslint-disable-next-line
+        const availableChannels = await this.permissions.getAvailableChannels(connection.userId!)
+      }
     }
   }
   
