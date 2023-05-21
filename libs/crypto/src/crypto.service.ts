@@ -36,7 +36,7 @@ export class CryptoService {
   importPrivateKey(data: Buffer) {
     return crypto.createPrivateKey({
       key: data,
-      type: 'pkcs1',
+      type: 'pkcs8',
       format: 'der',
     })
   }
@@ -48,12 +48,19 @@ export class CryptoService {
   importPublicKey(data: Buffer) {
     return crypto.createPublicKey({
       key: data,
-      type: 'pkcs1',
+      type: 'spki',
       format: 'der',
     })
   }
 
   exportKey(key: crypto.KeyObject) {
-    return key.export({ type: 'pkcs1', format: 'der' })
+    switch (key.type) {
+    case 'private':
+      return key.export({ type: 'pkcs8', format: 'der' })
+    case 'public':
+      return key.export({ type: 'spki', format: 'der' })
+    case 'secret':
+      return key.export()
+    }
   }
 }
