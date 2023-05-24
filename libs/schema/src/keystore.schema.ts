@@ -4,4 +4,8 @@ export interface Keystore {
   privateKey: string
   passwordHash: string
   iv: string
+
+  username?: string
+  avatar?: string
+  joinedServers?: string[]
 }

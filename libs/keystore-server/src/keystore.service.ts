@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable } from '@nestjs/common'
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common'
 import { KyselyService } from '@app/kysely-adapter/kysely.service'
 import { DB } from '@app/schema/db.schema'
 import { Keystore } from '@app/schema/keystore.schema'
@@ -21,6 +21,19 @@ export class KeystoreService {
       .then(i => BigInt(i?.entries ?? 0) > 0)
   }
 
+  async updateLogin(login: string, newData: Pick<Keystore, 'joinedServers' | 'avatar' | 'username'>) {
+    if (!await this.loginExists(login)) {
+      throw new NotFoundException({ code: ErrorCode.UnknownLogin })
+    }
+    
+    return this.kysely.updateTable('keystore')
+      .where('login', '=', login)
+      .set(newData)
+      .returningAll()
+      .executeTakeFirst()
+      .then(a => a!)
+  }
+
   async addLogin(a: Keystore) {
     if (await this.loginExists(a.login)) {
       throw new ConflictException({ code: ErrorCode.LoginAlreadyTaken })
@@ -38,10 +51,15 @@ export class KeystoreService {
   }
 
   async getByLogin(login: string) {
-    return this.kysely.selectFrom('keystore')
+    const res = await this.kysely.selectFrom('keystore')
       .selectAll()
       .where('keystore.login', '=', login)
       .executeTakeFirst()
-      .then(e => e ?? null)
+
+    if (res === undefined) {
+      throw new NotFoundException({ code: ErrorCode.UnknownLogin })
+    }
+
+    return res
   }
 }
